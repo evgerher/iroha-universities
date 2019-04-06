@@ -1,0 +1,9 @@
+{
+  "university_name": "KFU",
+  "faculties":[
+      "faculty_1":[
+            "spec1":123,
+            "spec2":124
+    ]
+  ]
+}
