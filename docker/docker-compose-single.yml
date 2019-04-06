@@ -17,7 +17,7 @@ networks:
 
 services:
   kai:
-    image: hyperledger/iroha:develop-build
+    image: hyperledger/iroha
     ports:
       - "50051:50051"
       - "20000:20000"
@@ -30,9 +30,10 @@ services:
       - IROHA_POSTGRES_USER=iroha
       - IROHA_POSTGRES_PASSWORD=helloworld
       - CCACHE_DIR=/tmp/ccache
+      - KEY=node
 
     volumes:
-      # - ../:/opt/iroha
+      - ./genesis:/opt/iroha
       - ccache-data_kai:/tmp/ccache
     working_dir: /opt/iroha
 
