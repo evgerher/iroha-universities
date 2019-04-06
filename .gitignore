@@ -7,10 +7,10 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+.idea/**
 # Generated files
 .idea/**/contentModel.xml
-
+target/**
 # Sensitive or high-churn files
 .idea/**/dataSources/
 .idea/**/dataSources.ids
