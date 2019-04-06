@@ -33,7 +33,7 @@ services:
       - KEY=node
 
     volumes:
-      - ./genesis:/opt/iroha
+      - ./genesis-kai:/opt/iroha
       - ccache-data_kai:/tmp/ccache
     working_dir: /opt/iroha
 
