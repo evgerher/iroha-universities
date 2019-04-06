@@ -1,0 +1,56 @@
+version: '3'
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+
+  net_kai:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 173.17.1.0/24
+
+services:
+  kai:
+    image: hyperledger/iroha:develop-build
+    ports:
+      - "50051:50051"
+      - "20000:20000"
+    depends_on:
+      - postgres_kai
+    tty: true
+    environment:
+      - IROHA_POSTGRES_HOST=173.17.1.11
+      - IROHA_POSTGRES_PORT=5432
+      - IROHA_POSTGRES_USER=iroha
+      - IROHA_POSTGRES_PASSWORD=helloworld
+      - CCACHE_DIR=/tmp/ccache
+
+    volumes:
+      # - ../:/opt/iroha
+      - ccache-data_kai:/tmp/ccache
+    working_dir: /opt/iroha
+
+    networks:
+      net_kai:
+        ipv4_address: 173.17.1.10
+      default:
+        ipv4_address: 192.168.0.2
+
+
+  postgres_kai:
+    image: postgres:9.5
+    environment:
+      - POSTGRES_USER=iroha
+      - IROHA_POSTGRES_PASSWORD=helloworld
+    networks:
+      net_kai:
+        ipv4_address: 173.17.1.11
+
+volumes:
+  ccache-data_kai:
