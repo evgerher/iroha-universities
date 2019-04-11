@@ -14,4 +14,13 @@ public class Speciality {
     String description;
     String code;
     int quantity;
+
+    @Override
+    public String toString() {
+        return "{\"name\": " + name
+            + ", \"description\": " + description
+            + ", \"code\": " + code
+            + ", \"quantity\": " + quantity
+            + "}";
+    }
 }
