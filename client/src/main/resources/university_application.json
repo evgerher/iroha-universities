@@ -1,0 +1,23 @@
+{
+  "university_name": "KFU",
+  "faculties":[
+    {
+      "name":"",
+      "description":"",
+      "positions": [
+        {
+          "description": "",
+          "name": "",
+          "code": "",
+          "quantity": 123
+        },
+        {
+          "description": "",
+          "name": "",
+          "code": "",
+          "quantity": 124
+        }
+      ]
+    }
+  ]
+}
