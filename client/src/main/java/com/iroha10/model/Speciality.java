@@ -1,6 +1,8 @@
 package com.iroha10.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Speciality {
-    String name;
-    String description;
-    String code;
-    int quantity;
+    private String name;
+    private String description;
+    private String code;
+    private int quantity;
 
     @Override
     public String toString() {
