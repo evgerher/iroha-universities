@@ -12,22 +12,10 @@ import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
 
 
 @SpringBootApplication
-public class IrohaProxyApplication {
+public class IrohaProxyApplication  {
 
 	public static void main(String[] args) {
-//		SpringApplication.run(IrohaProxyApplication.class, args);
-
-		for(int i = 0;i<10;i++) {
-			Ed25519Sha3 crypto = new Ed25519Sha3();
-			KeyPair peerKeypair = crypto.generateKeypair();
-
-			System.out.println(i);
-			System.out.println("public: ");
-			System.out.println(bytesToHex(peerKeypair.getPublic().getEncoded()));
-			System.out.println("private: ");
-			System.out.println(bytesToHex(peerKeypair.getPrivate().getEncoded()));
-		}
-
+		SpringApplication.run(IrohaProxyApplication.class, args);
 	}
 
 	private static String bytesToHex(byte[] hashInBytes) {
