@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Speciality {
     private static final Gson gson = new GsonBuilder().create();
+    private String university;
     private String name;
     private String description;
     private String code;

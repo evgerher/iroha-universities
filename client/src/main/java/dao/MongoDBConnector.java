@@ -6,8 +6,8 @@ import com.google.gson.GsonBuilder;
 import com.iroha10.model.Speciality;
 import com.iroha10.model.University;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
@@ -15,6 +15,7 @@ import com.mongodb.client.model.Indexes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.bson.BSON;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -58,27 +59,8 @@ public class MongoDBConnector {
     return client.getDatabase(database);
   }
 
-  public void insertSpeciality(String universityName, Speciality spec) {
-    MongoCollection<Document> uniCollection = getDB().getCollection(UNIVERSITY_COLLECTION);
-    BasicDBObject query = new BasicDBObject();
-    query.put("name", universityName);
-
-    Document uni = uniCollection.find(query).first();
-    String json = uni.toJson();
-    University university = new GsonBuilder().create().fromJson(json, University.class);
-    university.addSpeciality(spec);
-
-    Bson filter = eq("name", universityName);
-    BasicDBObject updateFields = new BasicDBObject();
-    updateFields.append("specialities", university.specialitiesToString());
-    BasicDBObject setQuery = new BasicDBObject();
-    setQuery.append("$set", updateFields);
-    uniCollection.updateOne(filter, setQuery);
-
-  }
-
-  private Document convertJsonToDoc(String json) {
-    return Document.parse(json);
+  public void insertSpeciality(Speciality spec) {
+    insertDoc(SPECIALITY_COLLECTION, spec);
   }
 
   public void insertUniversity(University uni) {
@@ -87,7 +69,6 @@ public class MongoDBConnector {
 
   public Collection<University> getUniversities() {
     Gson gson = new GsonBuilder().create();
-
     MongoCollection<Document> collection = getDB().getCollection(UNIVERSITY_COLLECTION);
 
     List<University> unis = new ArrayList<>();
@@ -95,18 +76,28 @@ public class MongoDBConnector {
       String json = doc.toJson();
       return gson.fromJson(json, University.class);
     }).into(new ArrayList<University>());
+  }
 
-//    try (MongoCursor<Document> cursor = collection.find().iterator()) {
-//      String json = cursor.next().toJson();
-//      unis.add(gson.fromJson(json, University.class));
-//    }
-//    return unis;
-//
-//    return Stream.generate(collection.find().iterator()::next)
-//      .map(doc -> {
-//          String json = doc.toJson();
-//          return gson.fromJson(json, University.class);
-//        }).collect(Collectors.toList());
+  public Collection<Speciality> getSpecialities() {
+    return getSpecialities(null);
+  }
+
+  public Collection<Speciality> getSpecialities(String universityName) {
+    Gson gson = new GsonBuilder().create();
+    MongoCollection<Document> collection = getDB().getCollection(SPECIALITY_COLLECTION);
+
+    FindIterable<Document> iterable;
+    if (universityName == null)
+      iterable = collection.find();
+    else {
+      Bson filter = eq("university", universityName);
+      iterable = collection.find(filter);
+    }
+
+    return iterable.map(doc -> {
+      String json = doc.toJson();
+      return gson.fromJson(json, Speciality.class);
+    }).into(new ArrayList<Speciality>());
   }
 
   private void insertDoc(String collectionName, Object object) {
@@ -117,19 +108,15 @@ public class MongoDBConnector {
 
   public static void main(String[] args) {
     MongoDBConnector connector = new MongoDBConnector();
-//    MongoClient client = connector.getClient();
-//    MongoDatabase mdb = client.getDatabase(database);
-//    MongoCollection<Document> universities =  mdb.getCollection(UNIVERSITY_COLLECTION);
-    University uni = new University("SPB", new ArrayList<>());
-    connector.insertUniversity(uni);
-    Collection<University> universities1 = connector.getUniversities();
-
-//    Speciality spec = new Speciality("msit", "lorem ipsum", "12.33.520", 120);
-//    connector.insertSpeciality("SPB", spec);
-
-    Collection<University> universities2 = connector.getUniversities();
+    Speciality spec = new Speciality("KAI", "sibsutis", "lorem ipsum ist dalor", "123.C.400", 400);
+    connector.insertSpeciality(spec);
+    spec = new Speciality("UI", "sibsutis", "lorem ipsum ist dalor", "123.C.400", 250);
+    connector.insertSpeciality(spec);
+    spec = new Speciality("UI", "another", "lorem ipsum ist dalor", "123.C.400", 100);
+    connector.insertSpeciality(spec);
+    Collection<Speciality> specialities = connector.getSpecialities();
+    specialities = connector.getSpecialities("UI");
 
     System.out.println();
   }
-
 }

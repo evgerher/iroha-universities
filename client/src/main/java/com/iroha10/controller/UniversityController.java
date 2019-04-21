@@ -29,7 +29,7 @@ public class UniversityController {
 
   @RequestMapping(value = "", method = RequestMethod.POST)
   public University saveUniversity(@RequestParam String name) {
-    University uni = new University(name, new ArrayList<>());
+    University uni = new University(name);
     logger.info(uni.toString());
     universities.put(name, uni);
     return uni;
