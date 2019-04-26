@@ -1,0 +1,122 @@
+block_v1 {
+  payload {
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_role {
+              role_name: "ui"
+              permissions: can_add_asset_qty
+              permissions: can_add_domain_asset_qty
+              permissions: can_create_asset
+              permissions: can_read_assets
+              permissions: can_receive
+              permissions: can_transfer
+              permissions: can_get_my_acc_ast
+              permissions: can_get_my_txs
+            }
+          }
+          created_time: 1555781910064
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_role {
+              role_name: "applicant"
+              permissions: can_receive
+              permissions: can_transfer
+              permissions: can_get_my_acc_ast
+              permissions: can_get_my_txs
+            }
+          }
+          created_time: 1555781910085
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_domain {
+              domain_id: "ui"
+              default_role: "ui"
+            }
+          }
+          created_time: 1555781910085
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_domain {
+              domain_id: "universitySelection"
+              default_role: "applicant"
+            }
+          }
+          created_time: 1555781910088
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_account {
+              account_name: "ui"
+              domain_id: "ui"
+              public_key: "70860C4C4D21454481C5A8EF07C88981BFAA1E7074CEF940955BF492F00BA903"
+            }
+          }
+          created_time: 1555781910089
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_asset {
+              asset_name: "robokekui"
+              domain_id: "ui"
+            }
+          }
+          commands {
+            add_asset_quantity {
+              asset_id: "robokek#ui"
+              amount: "3"
+            }
+          }
+          created_time: 1555781910092
+          quorum: 1
+        }
+      }
+    }
+    transactions {
+      payload {
+        reduced_payload {
+          commands {
+            create_asset {
+              asset_name: "wild"
+              domain_id: "universitySelection"
+            }
+          }
+          created_time: 1555781910096
+          quorum: 1
+        }
+      }
+    }
+    tx_number: 7
+    height: 1
+    created_time: 1555781910096
+  }
+}
