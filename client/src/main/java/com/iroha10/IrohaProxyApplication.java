@@ -22,8 +22,9 @@ import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
 
 @SpringBootApplication
 public class IrohaProxyApplication  {
-
-	public static void main(String[] args) { }
+	public static void main(String[] args) {
+		SpringApplication.run(IrohaProxyApplication.class, args);
+	}
 
 	private static String bytesToHex(byte[] hashInBytes) {
 

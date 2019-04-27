@@ -15,7 +15,6 @@ import com.mongodb.client.model.Indexes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.bson.BSON;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -30,6 +29,7 @@ public class MongoDBConnector {
   private final static String SPECIALITY_COLLECTION = "speciality"; // todo: remove
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static MongoClient client = getClient();
+  private final Gson gson = new GsonBuilder().create();
 
   private void initializeCollections() {
     MongoDatabase db = client.getDatabase(database);
@@ -67,8 +67,7 @@ public class MongoDBConnector {
     insertDoc(UNIVERSITY_COLLECTION, uni);
   }
 
-  public Collection<University> getUniversities() {
-    Gson gson = new GsonBuilder().create();
+  public List<University> getUniversities() {
     MongoCollection<Document> collection = getDB().getCollection(UNIVERSITY_COLLECTION);
 
     List<University> unis = new ArrayList<>();
@@ -78,12 +77,11 @@ public class MongoDBConnector {
     }).into(new ArrayList<University>());
   }
 
-  public Collection<Speciality> getSpecialities() {
+  public List<Speciality> getSpecialities() {
     return getSpecialities(null);
   }
 
-  public Collection<Speciality> getSpecialities(String universityName) {
-    Gson gson = new GsonBuilder().create();
+  public List<Speciality> getSpecialities(String universityName) {
     MongoCollection<Document> collection = getDB().getCollection(SPECIALITY_COLLECTION);
 
     FindIterable<Document> iterable;
@@ -104,6 +102,14 @@ public class MongoDBConnector {
     MongoCollection<Document> collection = getDB().getCollection(collectionName);
     Document doc = Document.parse(object.toString());
     collection.insertOne(doc);
+  }
+
+  public University getUniversity(String uniName) {
+    MongoCollection<Document> collection = getDB().getCollection(UNIVERSITY_COLLECTION);
+    return collection.find(eq("name", uniName)).map(doc -> {
+      String json = doc.toJson();
+      return gson.fromJson(json, University.class);
+    }).first();
   }
 
   public static void main(String[] args) {
