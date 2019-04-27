@@ -4,16 +4,12 @@ import com.iroha10.model.Speciality;
 import com.iroha10.model.University;
 
 import dao.MongoDBConnector;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,11 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/university")
 public class UniversityController {
   private static final Logger logger = LoggerFactory.getLogger(UniversityController.class);
-  private static HashMap<String, University> universities;
   private final MongoDBConnector mongoConnector;
 
   public UniversityController() {
-    universities = new HashMap<>(5); // todo: save to external storage
     mongoConnector = new MongoDBConnector();
   }
 
@@ -41,23 +35,20 @@ public class UniversityController {
     University uni = new University(name);
     logger.info(uni.toString());
     mongoConnector.insertUniversity(uni);
-//    universities.put(name, uni);
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
   public University getUniversity(@RequestParam String name) {
-    return universities.get(name);
+    return mongoConnector.getUniversity(name);
   }
 
   @RequestMapping(value = "/all", method=RequestMethod.GET)
   public List<University> getUniversities() {
     return mongoConnector.getUniversities();
-//    return universities.values();
   }
 
   @RequestMapping(value = "/{shortName}", method=RequestMethod.GET)
   public University getUniversityByName(@PathVariable("shortName") String uniName) {
-//    return universities.get(uniName);
     return mongoConnector.getUniversity(uniName);
   }
 
