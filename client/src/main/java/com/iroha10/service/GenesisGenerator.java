@@ -2,6 +2,7 @@ package com.iroha10.service;
 
 import com.iroha10.model.Speciality;
 import com.iroha10.model.University;
+import com.iroha10.utils.ChainEntitiesUtils;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
@@ -32,6 +33,10 @@ public class GenesisGenerator {
         for (Transaction transaction : initialFunding(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
+
+        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+                .build().build());
         return genesisbuilder.build();
     }
 
@@ -39,6 +44,9 @@ public class GenesisGenerator {
     private static List<Transaction> initialFunding(List<University> universities) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
+            transactions.add(Transaction.builder(null)
+                    .createAsset(WILD_ASSET_NAME, getUniversityDomain(university), 0)
+                    .build());
             for (Speciality speciality : university.getSpecialities()) {
                 String assetName = getAssetName(speciality.getName(), university.getName());
                 String assetId = getAssetId(speciality.getName(), university.getName());
