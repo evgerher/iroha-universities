@@ -43,11 +43,14 @@ public class IrohaProxyApplication  {
 		GenesisGenerator.getGenesisBlock(Arrays.asList(university));
 		UniversityService service =  new UniversityService(ChainEntitiesUtils.universitiesKeys.get(university.getName()),
 				university);
-		Applicant applicant = new Applicant("name","surname", 300);
+		Applicant applicant = new Applicant("id","name","surname", 300);
 		KeyPair applicantKeys = service.createNewApplicantAccount(applicant);
 		Observable observable = service.getWildTokensTransaction(applicant);
 		observable.blockingSubscribe();
 		int balance = service.getBalanceOfApplicant(applicant, ChainEntitiesUtils.Consts.WILD_ASSET_NAME);
+		System.out.println("_______________________________________________");
+		System.out.println(balance);
+		System.out.println("_______________________________________________");
 
 
 	}

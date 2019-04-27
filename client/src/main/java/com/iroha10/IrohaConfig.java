@@ -1,7 +1,7 @@
 package com.iroha10;
 
 public class IrohaConfig {
-    public static String host = "192.168.0.2";
-    public static int port = 10001;
+    public static String host = "127.0.0.1";
+    public static int port =50051;
     public String KeyPairFilePath = "";
 }

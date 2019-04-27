@@ -42,8 +42,8 @@ public class ChainEntitiesUtils {
     public static String getAccountId(String accountName, String domain){
         return String.format("%s@%s",accountName,domain);
     }
-    public static String getApplicantAccountName(Applicant applicant, University university){
-        return applicant.toString();
+    public static String getApplicantAccountName(Applicant applicant){
+        return applicant.getId();
     }
     public static KeyPair generateKey(){
         Ed25519Sha3 crypto = new Ed25519Sha3();

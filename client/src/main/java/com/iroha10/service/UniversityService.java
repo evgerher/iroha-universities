@@ -22,16 +22,16 @@ import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.OperationsException;
 
+import static com.iroha10.utils.ChainEntitiesUtils.*;
 import static com.iroha10.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
 import static com.iroha10.utils.ChainEntitiesUtils.Consts.WILD_SPECIALITY_ASSET_NAME;
-import static com.iroha10.utils.ChainEntitiesUtils.generateKey;
-import static com.iroha10.utils.ChainEntitiesUtils.getApplicantAccountName;
-import static com.iroha10.utils.ChainEntitiesUtils.getUniversityAccountName;
+
 
 public class UniversityService {
     private static final Logger logger = LoggerFactory.getLogger(UniversityService.class);
@@ -39,6 +39,7 @@ public class UniversityService {
     private University university;
     private IrohaAPI api;
     boolean success;
+
 
     public UniversityService(KeyPair keyPair, University university){ //todo rewrite for current user instead of university
         this.universityKeyPair = keyPair;
@@ -48,8 +49,10 @@ public class UniversityService {
 
     public KeyPair createNewApplicantAccount(Applicant applicant){
         val keys = generateKey();
+        val applicantAccountName = getApplicantAccountName(applicant);
+        val domain = getUniversityDomain(university);
         val transaction = Transaction.builder(getUniversityAccountName(university))
-                .createAccount(getApplicantAccountName(applicant, university),keys.getPublic())
+                .createAccount(getAccountId(applicantAccountName,domain),keys.getPublic())
                 .sign(universityKeyPair)
                 .build();
         api.transaction(transaction).blockingSubscribe();
@@ -87,7 +90,7 @@ public class UniversityService {
 //                 .setB
  //   }
     private TransactionOuterClass.Transaction createTransactionToUniversity(Applicant applicant, String assetType, Integer assetsQuantity, KeyPair keyPair){
-        String applicant_account = getApplicantAccountName(applicant, university);
+        String applicant_account = getApplicantAccountName(applicant);
         String university_account =  getUniversityAccountName(university);
         return Transaction.builder(applicant_account)
                 .addAssetQuantity(assetType, assetsQuantity.toString())
@@ -98,11 +101,13 @@ public class UniversityService {
     }
 
     private TransactionOuterClass.Transaction createTransactionFromUniversity(Applicant applicant, String assetType, Integer assetsQuantity ){
-        String applicant_account = getApplicantAccountName(applicant, university);
+        String applicant_account = getApplicantAccountName(applicant);
         String university_account =  getUniversityAccountName(university);
+        String universityAccountId = getAccountId(university_account,getUniversityDomain(university));
+        String applicationAccountId = getAccountId(applicant_account,getUniversityDomain(university));
         return Transaction.builder(university_account)
-                .addAssetQuantity(assetType, assetsQuantity.toString())
-                .transferAsset(university_account,applicant_account,assetType
+                .addAssetQuantity(getAssetId(assetType,university.getName()), assetsQuantity.toString())
+                .transferAsset(universityAccountId,applicationAccountId,getAssetId(assetType, university.getName())
                         ,"",assetsQuantity.toString())
                 .sign(universityKeyPair)
                 .build();
@@ -112,8 +117,8 @@ public class UniversityService {
 
     public int getBalanceOfApplicant(Applicant applicant, String assertType) {
         val api = IrohaApiSingletone.getIrohaApiInstance();
-        val query = Query.builder(getUniversityAccountName(university), 1)
-                .getAccountAssets(getApplicantAccountName(applicant, university))
+        val query = Query.builder(getAccountId(getUniversityAccountName(university),getUniversityDomain(university)),1)
+                .getAccountAssets(getAccountId(getApplicantAccountName(applicant),getUniversityDomain(university)))
                 .buildSigned(universityKeyPair);
         val balance = api.query(query);
         val assets = balance.getAccountAssetsResponse().getAccountAssetsList();
@@ -126,9 +131,5 @@ public class UniversityService {
                 .orElse(0);
     }
 
-    @Data
-    @NoArgsConstructor
-    protected class Completeness{
-        private boolean success;
-    }
+
 }

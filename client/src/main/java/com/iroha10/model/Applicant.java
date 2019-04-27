@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Applicant {
+    private String id;
     private String name;
     private String surname;
     private int totalPoints;
