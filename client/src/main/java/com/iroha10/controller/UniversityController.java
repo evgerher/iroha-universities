@@ -1,10 +1,9 @@
 package com.iroha10.controller;
 
-import com.iroha10.model.Speciality;
-import com.iroha10.model.University;
+import com.iroha10.model.university.Speciality;
+import com.iroha10.model.university.University;
 
 import dao.MongoDBConnector;
-import java.util.HashMap;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -64,17 +63,7 @@ public class UniversityController {
   }
 
   @RequestMapping(value = "/speciality", method = RequestMethod.GET)
-  public List<Speciality> saveSpeciality(@RequestParam String university) {
-    try {
-      return mongoConnector.getSpecialities(university);
-    } catch (Exception e) {
-      logger.error("Exception occured, e={}", e);
-      throw e;
-    }
-  }
-
-  @RequestMapping(value = "/speciality/{code}", method = RequestMethod.GET)
-  public List<Speciality> saveSpeciality(@PathVariable("code") String code, @RequestParam String university) {
+  public List<Speciality> saveSpeciality(@RequestParam(required = false) String code, @RequestParam(required = false) String university) {
     try {
       return mongoConnector.getSpecialities(code, university);
     } catch (Exception e) {
@@ -82,7 +71,6 @@ public class UniversityController {
       throw e;
     }
   }
-
   @RequestMapping(value = "/speciality/all", method = RequestMethod.GET)
   public List<Speciality> saveSpeciality() {
     try {

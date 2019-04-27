@@ -3,8 +3,8 @@ package dao;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.iroha10.model.Speciality;
-import com.iroha10.model.University;
+import com.iroha10.model.university.Speciality;
+import com.iroha10.model.university.University;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -79,26 +79,7 @@ public class MongoDBConnector {
   }
 
   public List<Speciality> getSpecialities() {
-    return getSpecialities(null);
-  }
-
-  public List<Speciality> getSpecialities(String universityName) {
-    try (MongoClient client = getClient()) {
-      MongoCollection<Document> collection = getDB(client).getCollection(SPECIALITY_COLLECTION);
-
-      FindIterable<Document> iterable;
-      if (universityName == null)
-        iterable = collection.find();
-      else {
-        Bson filter = eq("university", universityName);
-        iterable = collection.find(filter);
-      }
-
-      return iterable.map(doc -> {
-        String json = doc.toJson();
-        return gson.fromJson(json, Speciality.class);
-      }).into(new ArrayList<>());
-    }
+    return getSpecialities(null, null);
   }
 
   private void insertDoc(String collectionName, Object object) {
@@ -119,17 +100,30 @@ public class MongoDBConnector {
     }
   }
 
+  private boolean parameterIsValid(String param) {
+    return param != null && !param.isEmpty();
+  }
+
   public List<Speciality> getSpecialities(String code, String university) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(SPECIALITY_COLLECTION);
 
-      Bson filter;
-      if (university != null && !university.isEmpty())
-        filter = and(eq("code", code), eq("university", university));
-      else
-        filter = eq("code", code);
+      FindIterable<Document> it;
+      if (parameterIsValid(university) || parameterIsValid(code)) {
+        Bson filter;
+        if (parameterIsValid(university) && parameterIsValid(code))
+          filter = and(eq("code", code), eq("university", university));
+        else if (parameterIsValid(code))
+          filter = eq("code", code);
+        else
+          filter = eq("university", university);
 
-      return collection.find(filter).map(doc -> {
+        it = collection.find(filter);
+      } else
+        it = collection.find();
+
+
+      return it.map(doc -> {
         String json = doc.toJson();
         return gson.fromJson(json, Speciality.class);
       }).into(new ArrayList<>());

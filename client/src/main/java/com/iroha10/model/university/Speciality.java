@@ -1,4 +1,4 @@
-package com.iroha10.model;
+package com.iroha10.model.university;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;

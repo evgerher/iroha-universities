@@ -1,11 +1,9 @@
-package com.iroha10.model;
+package com.iroha10.model.university;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
