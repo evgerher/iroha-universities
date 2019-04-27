@@ -1,0 +1,320 @@
+{
+	"info": {
+		"_postman_id": "05fd4a75-2abf-4e6a-8a46-1fb9e40071c2",
+		"name": "iroha-universities",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "University",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "name",
+						"value": "dao",
+						"disabled": true
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:30333/university?name=KAI",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "KAI"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Speciality",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"gsoc\",\n\t\"description\": \"Lorem ipsum ist dalor\",\n\t\"code\": \"152-23-1\",\n\t\"quantity\": 100,\n\t\"university\": \"SibSUTIS\"\n}\t"
+				},
+				"url": {
+					"raw": "http://localhost:30333/university/speciality",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university",
+						"speciality"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "University",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/university/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Universities",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/university?name=KAI",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "KAI"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Speciality",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/university/speciality?code=152-23-1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university",
+						"speciality"
+					],
+					"query": [
+						{
+							"key": "university",
+							"value": "KAI",
+							"disabled": true
+						},
+						{
+							"key": "code",
+							"value": "152-23-1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Speciality all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/university/speciality/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"university",
+						"speciality",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applicant register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/applicant/register?name=George Martin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"applicant",
+						"register"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "George Martin"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applicant",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Code",
+						"value": "16bz54d",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:30333/applicant",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"applicant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applicant select",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Code",
+						"type": "text",
+						"value": "16bz54d"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": \"12-56-30\",\n\t\"university\": \"KAI\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:30333/applicant/select",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"applicant",
+						"select"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applicant exchange",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Code",
+						"type": "text",
+						"value": "16bz54d"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": {\n\t\t\"code\": \"12-56-30\",\n\t\t\"university\": \"KAI\"\n\t}, \n\t\"to\": {\n\t\t\"code\": \"data-mining\",\n\t\t\"university\": \"SibSUTIS\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://localhost:30333/applicant/exchange",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "30333",
+					"path": [
+						"applicant",
+						"exchange"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
