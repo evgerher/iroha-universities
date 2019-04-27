@@ -31,7 +31,7 @@
     </dependency>
     <dependency>
       <groupId>com.iroha</groupId>
-      <artifactId>blockchain-client</artifactId>
+      <artifactId>blockchain</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>

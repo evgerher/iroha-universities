@@ -5,7 +5,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>server</module>
-		<module>blockchain-client</module>
+		<module>blockchain</module>
 		<module>models</module>
 	</modules>
 
