@@ -1,6 +1,6 @@
 package com.iroha10.controller;
 
-import com.iroha10.model.applicant.Applicant;
+import com.iroha10.model.applicant.ResponseApplicant;
 import com.iroha10.model.applicant.ApplicantExchangeSpeciality;
 import com.iroha10.model.applicant.ApplicantSelectSpeciality;
 import com.iroha10.model.applicant.UserCode;
@@ -29,7 +29,7 @@ public class ApplicantController {
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
-  public Applicant getApplicant(@RequestHeader(value="User-Code") UserCode userCode) {
+  public ResponseApplicant getApplicant(@RequestHeader(value="User-Code") UserCode userCode) {
     logger.info("Get applicant with usercode={}", userCode);
     return applicantService.getApplicant(userCode);
   }
@@ -39,7 +39,7 @@ public class ApplicantController {
       @RequestBody ApplicantSelectSpeciality applicantSelect) {
     // todo: return track code ???
 
-    logger.info("Applicant with usercode={} selects speciality code={}, university={}",
+    logger.info("ResponseApplicant with usercode={} selects speciality code={}, university={}",
         userCode, applicantSelect.getCode(), applicantSelect.getUniversity());
     applicantService.selectSpeciality(userCode, applicantSelect);
   }
@@ -49,7 +49,7 @@ public class ApplicantController {
       @RequestBody ApplicantExchangeSpeciality applicantExchange) {
     // todo: return track code ???
 
-    logger.info("Applicant with usercode={} exchanges speciality from={}, to={}",
+    logger.info("ResponseApplicant with usercode={} exchanges speciality from={}, to={}",
         userCode, applicantExchange.getFrom(), applicantExchange.getTo());
     applicantService.exchangeSpecialities(userCode, applicantExchange);
   }

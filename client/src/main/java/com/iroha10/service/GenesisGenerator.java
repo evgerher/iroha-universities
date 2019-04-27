@@ -2,84 +2,86 @@ package com.iroha10.service;
 
 import com.iroha10.model.university.Speciality;
 import com.iroha10.model.university.University;
+import com.iroha10.utils.ChainEntitiesUtils;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
 import java.util.*;
-import java.security.KeyPair;
-import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
-
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
 
+import static com.iroha10.utils.ChainEntitiesUtils.*;
+import static com.iroha10.utils.ChainEntitiesUtils.Consts.APPLICANT_ROLE;
+import static com.iroha10.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
+import static com.iroha10.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
+
 public class GenesisGenerator {
-    private static final String unibersitiesDomain = "universitySelection";
-    public static final String applicantRole = "applicant";
-    private static final Ed25519Sha3 crypto = new Ed25519Sha3();
-    public static Map<String,KeyPair> universitiesKeys;
-    public static final String wildAssetName = "wild";
-
-
-
-    public static BlockOuterClass.Block getGenesisBlock(List<University> universities){
+    public static BlockOuterClass.Block getGenesisBlock(List<University> universities) {
         generateKeys(universities);
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
-        for(Transaction transaction: getRequiredRoles(universities)){
+        for (Transaction transaction : getRequiredRoles(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
-        for(Transaction transaction: getDomains(universities)){
+        for (Transaction transaction : getDomains(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
-        for(Transaction transaction: getAccounts(universities)){
+        for (Transaction transaction : getAccounts(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
-        for(Transaction transaction: initialFunding(universities)){
+        for (Transaction transaction : initialFunding(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
-      return genesisbuilder.build();
+
+        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+                .build().build());
+        return genesisbuilder.build();
     }
 
 
     private static List<Transaction> initialFunding(List<University> universities) {
         List<Transaction> transactions = new ArrayList<>();
-        for(University university: universities){
-            for(Speciality speciality:university.getSpecialities()){
-                String assetName = getAssetName(speciality.getName(),university.getName());
-                String assetId = getAssetId(speciality.getName(),university.getName());
+        for (University university : universities) {
+            transactions.add(Transaction.builder(null)
+                    .createAsset(WILD_ASSET_NAME, getUniversityDomain(university), 0)
+                    .build());
+            for (Speciality speciality : university.getSpecialities()) {
+                String assetName = getAssetName(speciality.getName(), university.getName());
+                String assetId = getAssetId(speciality.getName(), university.getName());
                 transactions.add(Transaction.builder(null)
-                        .createAsset(assetName,university.getName(),0)
-                        .addAssetQuantity(assetId,Integer.toString(speciality.getQuantity()))
+                        .createAsset(assetName, getUniversityDomain(university), 0)
+                        .addAssetQuantity(assetId, Integer.toString(speciality.getQuantity()))
                         .build());
 
             }
         }
         transactions.add(Transaction.builder(null)
-            .createAsset(wildAssetName,unibersitiesDomain,0)
-            .build());
+                .createAsset(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN, 0)
+                .build());
         return transactions;
     }
 
 
     private static List<Transaction> getDomains(List<University> universities) {
-        List<Transaction> transactions =  new ArrayList<>();
-        for(University university: universities){
+        List<Transaction> transactions = new ArrayList<>();
+        for (University university : universities) {
             transactions.add(Transaction.builder(null)
-                    .createDomain(university.getName(),university.getName())
+                    .createDomain(getUniversityDomain(university), getUniversityRole(university))
                     .build()
             );
         }
         transactions.add(Transaction.builder(null)
-                .createDomain(unibersitiesDomain,applicantRole)
+                .createDomain(UNIVERSITIES_DOMAIN, APPLICANT_ROLE)
                 .build()
         );
         return transactions;
     }
 
     private static List<Transaction> getRequiredRoles(List<University> universities) {
-        List<Transaction> transactions =  new ArrayList<>();
-        for (University university: universities) {
+        List<Transaction> transactions = new ArrayList<>();
+        for (University university : universities) {
             transactions.add(Transaction.builder(null)
-                    .createRole(university.getName(),
+                    .createRole(getUniversityRole(university),
                             Arrays.asList(
                                     RolePermission.can_add_asset_qty,
                                     RolePermission.can_add_domain_asset_qty,
@@ -88,13 +90,15 @@ public class GenesisGenerator {
                                     RolePermission.can_receive,
                                     RolePermission.can_transfer,
                                     RolePermission.can_get_my_acc_ast,
-                                    RolePermission.can_get_my_txs
+                                    RolePermission.can_get_my_txs,
+                                    RolePermission.can_get_all_acc_ast,
+                                    RolePermission.can_get_all_acc_detail
                             )
-            ).build());
+                    ).build());
 
         }
         transactions.add(Transaction.builder(null)
-                .createRole(applicantRole,
+                .createRole(APPLICANT_ROLE,
                         Arrays.asList(
                                 RolePermission.can_receive,
                                 RolePermission.can_transfer,
@@ -105,11 +109,11 @@ public class GenesisGenerator {
         return transactions;
     }
 
-    private static List<Transaction> getAccounts(List<University> universities){
-        List<Transaction> transactions =  new ArrayList<>();
-        for(University university: universities){
+    private static List<Transaction> getAccounts(List<University> universities) {
+        List<Transaction> transactions = new ArrayList<>();
+        for (University university : universities) {
             transactions.add(Transaction.builder(null)
-            .createAccount(university.getName(),university.getName(),universitiesKeys.get(university.getName()).getPublic())
+                    .createAccount(getUniversityAccountName(university), getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;
@@ -117,17 +121,5 @@ public class GenesisGenerator {
 
     }
 
-    private static void generateKeys(List<University> universities){
-         universitiesKeys = new HashMap<>();
-        for(University university: universities){
-            universitiesKeys.put(university.getName(),crypto.generateKeypair());
-        }
-    }
 
-    private static String getAssetName(String specialityName,String universityName){
-        return String.format("%s%s",specialityName, universityName);
-    }
-    private static String getAssetId(String specialityName,String universityName){
-        return String.format("%s#%s",specialityName, universityName);
-    }
 }

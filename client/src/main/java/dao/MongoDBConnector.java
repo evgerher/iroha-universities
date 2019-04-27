@@ -3,7 +3,7 @@ package dao;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.iroha10.model.IrohaApplicant;
+import com.iroha10.model.Applicant;
 import com.iroha10.model.university.Speciality;
 import com.iroha10.model.university.University;
 
@@ -137,15 +137,15 @@ public class MongoDBConnector { // todo: dependency injection
   }
 
 
-  public void insertApplicant(IrohaApplicant applicant) {
+  public void insertApplicant(Applicant applicant) {
     insertDoc(APPLICANTS_COLLECTION, applicant);
   }
 
-  public IrohaApplicant getApplicant(String usercode) {
+  public Applicant getApplicant(String pubkey) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
-      return collection.find(eq("userCode", usercode))
-          .map(jsonToObject(IrohaApplicant.class))
+      return collection.find(eq("pubkey", pubkey))
+          .map(jsonToObject(Applicant.class))
           .first();
     }
   }

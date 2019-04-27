@@ -12,12 +12,12 @@ import lombok.Data;
 @JsonInclude
 @Data
 @AllArgsConstructor
-public class Applicant {
+public class ResponseApplicant {
   private static final Gson gson = new GsonBuilder().create();
   private final String name;
   private final List<Asset> assets;
 
-  public Applicant(String name) {
+  public ResponseApplicant(String name) {
     this.name = name;
     this.assets = new ArrayList<>();
   }
