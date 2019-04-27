@@ -118,4 +118,21 @@ public class MongoDBConnector {
       }).first();
     }
   }
+
+  public List<Speciality> getSpecialities(String code, String university) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(SPECIALITY_COLLECTION);
+
+      Bson filter;
+      if (university != null && !university.isEmpty())
+        filter = and(eq("code", code), eq("university", university));
+      else
+        filter = eq("code", code);
+
+      return collection.find(filter).map(doc -> {
+        String json = doc.toJson();
+        return gson.fromJson(json, Speciality.class);
+      }).into(new ArrayList<>());
+    }
+  }
 }

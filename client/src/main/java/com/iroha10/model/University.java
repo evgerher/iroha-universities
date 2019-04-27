@@ -20,28 +20,18 @@ public class University {
   private List<Speciality> specialities;
   private static final Gson gson = new GsonBuilder().create();
 
-  public University(String name) {
+  public University(String name, String description) {
     this.name = name;
-    this.specialities = new ArrayList<>();
+    this.description = description;
   }
 
   @Override
   public String toString() {
-//    return "{\"name\": \"" + name + "\""
-//        + ", \"specialities\" :"
-//        + specialitiesToString()
-//        + "}";
     return gson.toJson(this);
   }
 
-  public String specialitiesToString() {
-    return gson.toJson(specialities);
-//    return "[" + specialities.stream()
-//        .map(Speciality::toString)
-//        .collect(Collectors.joining(" ")) + "]";
-  }
-
-  public void addSpeciality(Speciality speciality) {
-    specialities.add(speciality);
+  public void validate() {
+    if (name == null || name.isEmpty())
+      throw new RuntimeException("Invalid parameters");
   }
 }

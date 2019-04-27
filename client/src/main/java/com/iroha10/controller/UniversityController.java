@@ -31,10 +31,10 @@ public class UniversityController {
 
   @RequestMapping(value = "", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  public void saveUniversity(@RequestParam String name) {
-    University uni = new University(name);
-    logger.info(uni.toString());
-    mongoConnector.insertUniversity(uni);
+  public void saveUniversity(@RequestBody University university) {
+    university.validate();
+    logger.info(university.toString());
+    mongoConnector.insertUniversity(university);
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
@@ -67,6 +67,16 @@ public class UniversityController {
   public List<Speciality> saveSpeciality(@RequestParam String university) {
     try {
       return mongoConnector.getSpecialities(university);
+    } catch (Exception e) {
+      logger.error("Exception occured, e={}", e);
+      throw e;
+    }
+  }
+
+  @RequestMapping(value = "/speciality/{code}", method = RequestMethod.GET)
+  public List<Speciality> saveSpeciality(@PathVariable("code") String code, @RequestParam String university) {
+    try {
+      return mongoConnector.getSpecialities(code, university);
     } catch (Exception e) {
       logger.error("Exception occured, e={}", e);
       throw e;
