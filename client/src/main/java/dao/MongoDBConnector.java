@@ -19,13 +19,13 @@ import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MongoDBConnector {
+public class MongoDBConnector { // todo: dependency injection
   private static final Logger logger = LoggerFactory.getLogger(MongoDBConnector.class);
 
   private final static String mongoHost = "localhost";
   private final static int mongoPort = 27017;
   private final static String database = "university";
-  private final static String SPECIALITY_COLLECTION = "speciality"; // todo: remove
+  private final static String SPECIALITY_COLLECTION = "speciality";
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final Gson gson = new GsonBuilder().create();
 
