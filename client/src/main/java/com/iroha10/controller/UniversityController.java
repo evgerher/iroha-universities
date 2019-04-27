@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/university")
@@ -58,7 +59,7 @@ public class UniversityController {
       mongoConnector.insertSpeciality(speciality);
     } catch (Exception e) {
       logger.error("Exception occured, e={}", e);
-      throw e;
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
@@ -68,7 +69,7 @@ public class UniversityController {
       return mongoConnector.getSpecialities(code, university);
     } catch (Exception e) {
       logger.error("Exception occured, e={}", e);
-      throw e;
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
   @RequestMapping(value = "/speciality/all", method = RequestMethod.GET)
@@ -77,7 +78,7 @@ public class UniversityController {
       return mongoConnector.getSpecialities();
     } catch (Exception e) {
       logger.error("Exception occured, e={}", e);
-      throw e;
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 }

@@ -3,9 +3,11 @@ package dao;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.iroha10.model.IrohaApplicant;
 import com.iroha10.model.university.Speciality;
 import com.iroha10.model.university.University;
 
+import com.mongodb.Function;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -21,20 +23,24 @@ import org.slf4j.LoggerFactory;
 
 public class MongoDBConnector { // todo: dependency injection
   private static final Logger logger = LoggerFactory.getLogger(MongoDBConnector.class);
+  static {
+    initializeCollections();
+  }
 
   private final static String mongoHost = "localhost";
   private final static int mongoPort = 27017;
   private final static String database = "university";
   private final static String SPECIALITY_COLLECTION = "speciality";
   private final static String UNIVERSITY_COLLECTION = "universities";
+  private final static String APPLICANTS_COLLECTION = "applicants";
   private final Gson gson = new GsonBuilder().create();
 
-  private void initializeCollections() {
-    try (MongoClient client = getClient()) {
-      MongoDatabase db = getDB(client);
+  private static void initializeCollections() {
+    try (MongoClient client = new MongoClient(mongoHost , mongoPort)) {
+      MongoDatabase db = client.getDatabase(database);
       ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
 
-      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION};
+      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION};
 
       for (String collection : expected) {
         if (!collections.contains(collection)) {
@@ -43,10 +49,6 @@ public class MongoDBConnector { // todo: dependency injection
         }
       }
     }
-  }
-
-  public MongoDBConnector() {
-    initializeCollections();
   }
 
   private MongoClient getClient() {
@@ -71,10 +73,9 @@ public class MongoDBConnector { // todo: dependency injection
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_COLLECTION);
 
-      return collection.find().map(doc -> {
-        String json = doc.toJson();
-        return gson.fromJson(json, University.class);
-      }).into(new ArrayList<University>());
+      return collection.find()
+          .map(jsonToObject(University.class))
+          .into(new ArrayList<University>());
     }
   }
 
@@ -93,10 +94,9 @@ public class MongoDBConnector { // todo: dependency injection
   public University getUniversity(String uniName) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_COLLECTION);
-      return collection.find(eq("name", uniName)).map(doc -> {
-        String json = doc.toJson();
-        return gson.fromJson(json, University.class);
-      }).first();
+      return collection.find(eq("name", uniName))
+          .map(jsonToObject(University.class))
+          .first();
     }
   }
 
@@ -123,10 +123,30 @@ public class MongoDBConnector { // todo: dependency injection
         it = collection.find();
 
 
-      return it.map(doc -> {
-        String json = doc.toJson();
-        return gson.fromJson(json, Speciality.class);
-      }).into(new ArrayList<>());
+      return it
+          .map(jsonToObject(Speciality.class))
+          .into(new ArrayList<>());
+    }
+  }
+
+  private <T> Function<Document, T> jsonToObject(Class<T> clazz) {
+    return doc -> {
+      String json = doc.toJson();
+      return gson.fromJson(json, clazz);
+    };
+  }
+
+
+  public void insertApplicant(IrohaApplicant applicant) {
+    insertDoc(APPLICANTS_COLLECTION, applicant);
+  }
+
+  public IrohaApplicant getApplicant(String usercode) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
+      return collection.find(eq("userCode", usercode))
+          .map(jsonToObject(IrohaApplicant.class))
+          .first();
     }
   }
 }
