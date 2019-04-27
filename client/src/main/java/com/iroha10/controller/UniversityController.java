@@ -1,59 +1,84 @@
 package com.iroha10.controller;
 
-import com.iroha10.model.Speciality;
-import com.iroha10.model.University;
+import com.iroha10.model.university.Speciality;
+import com.iroha10.model.university.University;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import dao.MongoDBConnector;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/university")
 public class UniversityController {
   private static final Logger logger = LoggerFactory.getLogger(UniversityController.class);
-  private static HashMap<String, University> universities;
+  private final MongoDBConnector mongoConnector;
 
   public UniversityController() {
-    universities = new HashMap<>(5); // todo: save to external storage
+    mongoConnector = new MongoDBConnector();
   }
 
   @RequestMapping(value = "", method = RequestMethod.POST)
-  public University saveUniversity(@RequestParam String name) {
-    University uni = new University(name);
-    logger.info(uni.toString());
-    universities.put(name, uni);
-    return uni;
+  @ResponseStatus(HttpStatus.OK)
+  public void saveUniversity(@RequestBody University university) {
+    university.validate();
+    logger.info(university.toString());
+    mongoConnector.insertUniversity(university);
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
   public University getUniversity(@RequestParam String name) {
-    return universities.get(name);
+    return mongoConnector.getUniversity(name);
   }
 
   @RequestMapping(value = "/all", method=RequestMethod.GET)
-  public University[] getUniversities() {
-    return universities.values().toArray(new University[universities.values().size()]);
+  public List<University> getUniversities() {
+    return mongoConnector.getUniversities();
+  }
+
+  @RequestMapping(value = "/{shortName}", method=RequestMethod.GET)
+  public University getUniversityByName(@PathVariable("shortName") String uniName) {
+    return mongoConnector.getUniversity(uniName);
   }
 
   @RequestMapping(value = "/speciality", method = RequestMethod.POST)
-  public University saveSpeciality(@RequestParam(name="university") String uniName, @RequestBody Speciality speciality) {
+  public void saveSpeciality(@RequestBody Speciality speciality) {
     try {
-      University uni = universities.get(uniName);
-      uni.addSpeciality(speciality);
-      return uni;
+      speciality.validate();
+      mongoConnector.insertSpeciality(speciality);
     } catch (Exception e) {
-      logger.error("No uni found with name={}", uniName);
-      throw e;
+      logger.error("Exception occured, e={}", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  @RequestMapping(value = "/speciality", method = RequestMethod.GET)
+  public List<Speciality> saveSpeciality(@RequestParam(required = false) String code, @RequestParam(required = false) String university) {
+    try {
+      return mongoConnector.getSpecialities(code, university);
+    } catch (Exception e) {
+      logger.error("Exception occured, e={}", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+  @RequestMapping(value = "/speciality/all", method = RequestMethod.GET)
+  public List<Speciality> saveSpeciality() {
+    try {
+      return mongoConnector.getSpecialities();
+    } catch (Exception e) {
+      logger.error("Exception occured, e={}", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 }

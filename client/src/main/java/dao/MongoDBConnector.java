@@ -3,9 +3,11 @@ package dao;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.iroha10.model.Speciality;
-import com.iroha10.model.University;
+import com.iroha10.model.IrohaApplicant;
+import com.iroha10.model.university.Speciality;
+import com.iroha10.model.university.University;
 
+import com.mongodb.Function;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -13,48 +15,48 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import org.bson.BSON;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MongoDBConnector {
+public class MongoDBConnector { // todo: dependency injection
   private static final Logger logger = LoggerFactory.getLogger(MongoDBConnector.class);
+  static {
+    initializeCollections();
+  }
 
   private final static String mongoHost = "localhost";
   private final static int mongoPort = 27017;
   private final static String database = "university";
-  private final static String SPECIALITY_COLLECTION = "speciality"; // todo: remove
+  private final static String SPECIALITY_COLLECTION = "speciality";
   private final static String UNIVERSITY_COLLECTION = "universities";
-  private final static MongoClient client = getClient();
+  private final static String APPLICANTS_COLLECTION = "applicants";
+  private final Gson gson = new GsonBuilder().create();
 
-  private void initializeCollections() {
-    MongoDatabase db = client.getDatabase(database);
-    ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
+  private static void initializeCollections() {
+    try (MongoClient client = new MongoClient(mongoHost , mongoPort)) {
+      MongoDatabase db = client.getDatabase(database);
+      ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
 
-    String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION};
+      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION};
 
-    for (String collection: expected) {
-      if (!collections.contains(collection)) {
-        db.createCollection(collection);
-        db.getCollection(collection).createIndex(Indexes.ascending("name"));
+      for (String collection : expected) {
+        if (!collections.contains(collection)) {
+          db.createCollection(collection);
+          db.getCollection(collection).createIndex(Indexes.ascending("name"));
+        }
       }
     }
   }
 
-  public MongoDBConnector() {
-    initializeCollections();
-  }
-
-  private static MongoClient getClient() {
+  private MongoClient getClient() {
     logger.debug("Request connection to MongoDB");
     return new MongoClient(mongoHost , mongoPort);
   }
 
-  private MongoDatabase getDB() {
+  private MongoDatabase getDB(MongoClient client) {
     logger.debug("Request DB={}", database);
     return client.getDatabase(database);
   }
@@ -67,56 +69,84 @@ public class MongoDBConnector {
     insertDoc(UNIVERSITY_COLLECTION, uni);
   }
 
-  public Collection<University> getUniversities() {
-    Gson gson = new GsonBuilder().create();
-    MongoCollection<Document> collection = getDB().getCollection(UNIVERSITY_COLLECTION);
+  public List<University> getUniversities() {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_COLLECTION);
 
-    List<University> unis = new ArrayList<>();
-    return collection.find().map(doc -> {
-      String json = doc.toJson();
-      return gson.fromJson(json, University.class);
-    }).into(new ArrayList<University>());
-  }
-
-  public Collection<Speciality> getSpecialities() {
-    return getSpecialities(null);
-  }
-
-  public Collection<Speciality> getSpecialities(String universityName) {
-    Gson gson = new GsonBuilder().create();
-    MongoCollection<Document> collection = getDB().getCollection(SPECIALITY_COLLECTION);
-
-    FindIterable<Document> iterable;
-    if (universityName == null)
-      iterable = collection.find();
-    else {
-      Bson filter = eq("university", universityName);
-      iterable = collection.find(filter);
+      return collection.find()
+          .map(jsonToObject(University.class))
+          .into(new ArrayList<University>());
     }
+  }
 
-    return iterable.map(doc -> {
-      String json = doc.toJson();
-      return gson.fromJson(json, Speciality.class);
-    }).into(new ArrayList<Speciality>());
+  public List<Speciality> getSpecialities() {
+    return getSpecialities(null, null);
   }
 
   private void insertDoc(String collectionName, Object object) {
-    MongoCollection<Document> collection = getDB().getCollection(collectionName);
-    Document doc = Document.parse(object.toString());
-    collection.insertOne(doc);
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(collectionName);
+      Document doc = Document.parse(object.toString());
+      collection.insertOne(doc);
+    }
   }
 
-  public static void main(String[] args) {
-    MongoDBConnector connector = new MongoDBConnector();
-    Speciality spec = new Speciality("KAI", "sibsutis", "lorem ipsum ist dalor", "123.C.400", 400);
-    connector.insertSpeciality(spec);
-    spec = new Speciality("UI", "sibsutis", "lorem ipsum ist dalor", "123.C.400", 250);
-    connector.insertSpeciality(spec);
-    spec = new Speciality("UI", "another", "lorem ipsum ist dalor", "123.C.400", 100);
-    connector.insertSpeciality(spec);
-    Collection<Speciality> specialities = connector.getSpecialities();
-    specialities = connector.getSpecialities("UI");
+  public University getUniversity(String uniName) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_COLLECTION);
+      return collection.find(eq("name", uniName))
+          .map(jsonToObject(University.class))
+          .first();
+    }
+  }
 
-    System.out.println();
+  private boolean parameterIsValid(String param) {
+    return param != null && !param.isEmpty();
+  }
+
+  public List<Speciality> getSpecialities(String code, String university) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(SPECIALITY_COLLECTION);
+
+      FindIterable<Document> it;
+      if (parameterIsValid(university) || parameterIsValid(code)) {
+        Bson filter;
+        if (parameterIsValid(university) && parameterIsValid(code))
+          filter = and(eq("code", code), eq("university", university));
+        else if (parameterIsValid(code))
+          filter = eq("code", code);
+        else
+          filter = eq("university", university);
+
+        it = collection.find(filter);
+      } else
+        it = collection.find();
+
+
+      return it
+          .map(jsonToObject(Speciality.class))
+          .into(new ArrayList<>());
+    }
+  }
+
+  private <T> Function<Document, T> jsonToObject(Class<T> clazz) {
+    return doc -> {
+      String json = doc.toJson();
+      return gson.fromJson(json, clazz);
+    };
+  }
+
+
+  public void insertApplicant(IrohaApplicant applicant) {
+    insertDoc(APPLICANTS_COLLECTION, applicant);
+  }
+
+  public IrohaApplicant getApplicant(String usercode) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
+      return collection.find(eq("userCode", usercode))
+          .map(jsonToObject(IrohaApplicant.class))
+          .first();
+    }
   }
 }

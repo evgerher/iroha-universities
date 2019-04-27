@@ -1,4 +1,4 @@
-package com.iroha10.model;
+package com.iroha10.model.university;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
@@ -24,10 +24,18 @@ public class Speciality {
     @Override
     public String toString() {
         return gson.toJson(this);
-//        return "{\"name\": \"" + name  + "\""
-//            + ", \"description\": \"" + description  + "\""
-//            + ", \"code\": \"" + code  + "\""
-//            + ", \"quantity\": " + quantity
-//            + "}";
+    }
+
+    public void validate() {
+        if (university == null || university.isEmpty())
+            throw new RuntimeException("Invalid parameter");
+        if (name == null || name.isEmpty())
+            throw new RuntimeException("Invalid parameter");
+        if (description == null || description.isEmpty())
+            throw new RuntimeException("Invalid parameter");
+        if (code == null || code.isEmpty())
+            throw new RuntimeException("Invalid parameter");
+        if (quantity <= 0)
+            throw new RuntimeException("Invalid paramteter");
     }
 }

@@ -1,7 +1,7 @@
 package com.iroha10.service;
 
-import com.iroha10.model.Speciality;
-import com.iroha10.model.University;
+import com.iroha10.model.university.Speciality;
+import com.iroha10.model.university.University;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
@@ -9,7 +9,6 @@ import java.util.*;
 import java.security.KeyPair;
 import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
 
-import iroha.protocol.TransactionOuterClass;
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
 
