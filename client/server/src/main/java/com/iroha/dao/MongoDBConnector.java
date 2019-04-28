@@ -1,5 +1,6 @@
 package com.iroha.dao;
 
+import static com.iroha.utils.ChainEntitiesUtils.*;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,11 +15,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Indexes;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -187,14 +184,15 @@ public class MongoDBConnector {
   }
 
   public void insertUniversityKeys(University uni, KeyPair keys) {
-    try (MongoClient client = getClient()) {
+    try {
       String encodedKeys = encodeKeyPair(keys);
       Document doc = new Document();
       doc.append("university", uni.getName());
       doc.append("keypair", encodedKeys);
+
       insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
     } catch (IOException e) {
-      //todo: me
+      logger.error("Unable to encode keypair");
     }
   }
 
@@ -223,31 +221,6 @@ public class MongoDBConnector {
 
             return new UniversityKeys(name, keys);
           }).into(new ArrayList<>());
-    }
-  }
-
-  private String encodeKeyPair(KeyPair keys) throws IOException {
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-      try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
-        ous.writeObject(keys);
-        byte[] bytes = baos.toByteArray();
-        return ChainEntitiesUtils.bytesToHex(bytes);
-      }
-    } catch (IOException e) {
-      logger.error("Exception during key storing, {}", e);
-      throw e;
-    }
-  }
-
-  private KeyPair decodeKeyPair(byte[] bytes) {
-    try (ByteArrayInputStream bi = new ByteArrayInputStream(bytes)) {
-      try (ObjectInputStream oi = new ObjectInputStream(bi)) {
-        Object obj = oi.readObject();
-        return (KeyPair) obj;
-      }
-    } catch (Exception e) {
-      logger.error("Unable to parse class from byte object");
-      return null;
     }
   }
 }

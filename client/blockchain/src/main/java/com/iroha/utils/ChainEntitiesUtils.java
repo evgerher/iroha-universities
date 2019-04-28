@@ -2,14 +2,23 @@ package com.iroha.utils;
 
 import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
 
 import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChainEntitiesUtils {
+    private static final Logger logger = LoggerFactory.getLogger(ChainEntitiesUtils.class);
+
     public static String getAssetName(String specialityName,String universityName){
         return String.format("%s%s",specialityName, universityName);
     }
@@ -68,5 +77,30 @@ public class ChainEntitiesUtils {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    public static String encodeKeyPair(KeyPair keys) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
+                ous.writeObject(keys);
+                byte[] bytes = baos.toByteArray();
+                return ChainEntitiesUtils.bytesToHex(bytes);
+            }
+        } catch (IOException e) {
+            logger.error("Exception during key storing, {}", e);
+            throw e;
+        }
+    }
+
+    public static KeyPair decodeKeyPair(byte[] bytes) {
+        try (ByteArrayInputStream bi = new ByteArrayInputStream(bytes)) {
+            try (ObjectInputStream oi = new ObjectInputStream(bi)) {
+                Object obj = oi.readObject();
+                return (KeyPair) obj;
+            }
+        } catch (Exception e) {
+            logger.error("Unable to parse class from byte object");
+            return null;
+        }
     }
 }

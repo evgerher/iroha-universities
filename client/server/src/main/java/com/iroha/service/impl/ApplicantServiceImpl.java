@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ApplicantServiceImpl implements ApplicantService {
@@ -36,7 +38,7 @@ public class ApplicantServiceImpl implements ApplicantService {
   private final MongoDBConnector mongoConnector;
 
   @Autowired
-  public ApplicantServiceImpl(UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
+  public ApplicantServiceImpl(@Qualifier("KAI") UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
     this.universityService = universityService;
     this.mongoConnector = mongoConnector;
   }
@@ -85,13 +87,17 @@ public class ApplicantServiceImpl implements ApplicantService {
 
   @Override
   public ApplicantResponse getApplicant(UserCode userCode) {
-    Applicant applicant = mongoConnector.getApplicant(userCode.getUserCode());
-    List<AccountAsset> irohaAssets = universityService.getAllAssertsOfApplicant(applicant);
-    List<Asset> assets = irohaAssets.stream()
-        .map(this::convertAsset)
-        .collect(Collectors.toList());
+    try {
+      Applicant applicant = mongoConnector.getApplicant(userCode.getUserCode());
+      List<AccountAsset> irohaAssets = universityService.getAllAssertsOfApplicant(applicant);
+      List<Asset> assets = irohaAssets.stream()
+          .map(this::convertAsset)
+          .collect(Collectors.toList());
 
-    return new ApplicantResponse(applicant, assets);
+      return new ApplicantResponse(applicant, assets);
+    } catch (NullPointerException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Applicant with provided userCode not found", e);
+    }
   }
 
   @Override

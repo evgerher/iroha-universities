@@ -3,8 +3,7 @@ package com.iroha.service.impl;
 import com.iroha.dao.MongoDBConnector;
 import com.iroha.dao.model.UniversityKeys;
 import com.iroha.model.university.University;
-import com.iroha.service.GenesisGenerator;
-import com.iroha.service.IrohaService;
+import com.iroha.service.*;
 import iroha.protocol.BlockOuterClass;
 
 import java.security.KeyPair;
@@ -33,13 +32,6 @@ public class IrohaServiceImpl implements IrohaService {
             UniversityKeys::getUniversity,
             UniversityKeys::getKeys
         ));
-
-//    Map<String, KeyPair> uniKeyPairs = universities
-//        .stream()
-//        .collect(Collectors.toMap(
-//            University::getName,
-//            t -> mongoConnector.getUniversityKeys(t.getName())
-//        )); // create map of keys
 
     return GenesisGenerator.getGenesisBlock(universities, uniKeyPairs);
   }

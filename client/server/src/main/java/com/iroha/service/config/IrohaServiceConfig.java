@@ -15,7 +15,7 @@ public class IrohaServiceConfig {
   private MongoDBConnector mongoConnector;
 
   @Bean
-  public IrohaService getApplicantService() {
+  public IrohaService getIrohaService() {
     return new IrohaServiceImpl(mongoConnector);
   }
 }

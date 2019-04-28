@@ -1,14 +1,31 @@
 package com.iroha.service.impl;
 
+import com.iroha.dao.MongoDBConnector;
+import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
 import com.iroha.service.UniversityService;
+import iroha.protocol.QryResponses.AccountAsset;
 import java.security.KeyPair;
-import org.springframework.stereotype.Service;
+import java.util.List;
+import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-@Service
-public class UniversityWiredService extends UniversityService {
+public class UniversityWiredService {
+  private final MongoDBConnector mongoConnector;
+  private final UniversityService universityService;
 
-  public UniversityWiredService(KeyPair keyPair, University university) {
-    super(keyPair, university);
+  public UniversityWiredService(String uniName, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
+    this.mongoConnector = mongoConnector;
+    University university = mongoConnector.getUniversity(uniName);
+    KeyPair keys = mongoConnector.getUniversityKeys(uniName);
+    universityService = new UniversityService(keys, university);
+  }
+
+  public String createNewApplicantAccount(Applicant applicant, KeyPair keys, InlineTransactionStatusObserver observer) {
+    return universityService.createNewApplicantAccount(applicant, keys, observer);
+  }
+
+  public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
+    return universityService.getAllAssertsOfApplicant(applicant);
   }
 }
