@@ -32,9 +32,9 @@ public class GenesisGenerator {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
 
-//        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-//                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
-//                .build().build());
+        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+                .build().build());
         return genesisbuilder.build();
     }
 

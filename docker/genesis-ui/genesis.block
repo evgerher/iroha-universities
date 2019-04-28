@@ -16,9 +16,10 @@ block_v1 {
               permissions: can_get_my_txs
               permissions: can_get_all_acc_ast
               permissions: can_get_all_acc_detail
+              permissions: can_create_account
             }
           }
-          created_time: 1556387839629
+          created_time: 1556452948473
           quorum: 1
         }
       }
@@ -35,7 +36,7 @@ block_v1 {
               permissions: can_get_my_txs
             }
           }
-          created_time: 1556387839644
+          created_time: 1556452948538
           quorum: 1
         }
       }
@@ -49,7 +50,7 @@ block_v1 {
               default_role: "uirole"
             }
           }
-          created_time: 1556387839644
+          created_time: 1556452948538
           quorum: 1
         }
       }
@@ -63,7 +64,7 @@ block_v1 {
               default_role: "applicant"
             }
           }
-          created_time: 1556387839645
+          created_time: 1556452948540
           quorum: 1
         }
       }
@@ -73,12 +74,12 @@ block_v1 {
         reduced_payload {
           commands {
             create_account {
-              account_name: "uiaccount"
+              account_name: "ui_account"
               domain_id: "uidomain"
-              public_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
+              public_key: "B8EC06DBBA1CE32225B2F49E55573E164DF109E21AC4242E47C65C0182705507"
             }
           }
-          created_time: 1556387839645
+          created_time: 1556452948540
           quorum: 1
         }
       }
@@ -92,7 +93,7 @@ block_v1 {
               domain_id: "uidomain"
             }
           }
-          created_time: 1556387839647
+          created_time: 1556452948542
           quorum: 1
         }
       }
@@ -112,7 +113,7 @@ block_v1 {
               amount: "1"
             }
           }
-          created_time: 1556387839649
+          created_time: 1556452948544
           quorum: 1
         }
       }
@@ -126,7 +127,7 @@ block_v1 {
               domain_id: "universitySelection"
             }
           }
-          created_time: 1556387839650
+          created_time: 1556452948547
           quorum: 1
         }
       }
@@ -138,17 +139,17 @@ block_v1 {
             add_peer {
               peer {
                 address: "0.0.0.0:10001"
-                peer_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
+                peer_key: "B8EC06DBBA1CE32225B2F49E55573E164DF109E21AC4242E47C65C0182705507"
               }
             }
           }
-          created_time: 1556387839651
+          created_time: 1556452948547
           quorum: 1
         }
       }
     }
     tx_number: 9
     height: 1
-    created_time: 1556387839654
+    created_time: 1556452948552
   }
 }
