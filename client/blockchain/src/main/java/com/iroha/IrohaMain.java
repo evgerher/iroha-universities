@@ -48,6 +48,7 @@ public class IrohaMain {
     BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(Arrays.asList(university,kai,kfu));
     writeGenesisToFile(genesis,"./docker/genesis-kai/genesis.block");
     writeGenesisToFile(genesis,"./docker/genesis-ui/genesis.block");
+    writeGenesisToFile(genesis,"./docker/genesis-kfu/genesis.block");
     System.out.println("genesis generated");
     File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
@@ -104,7 +105,7 @@ public class IrohaMain {
     IrohaAPI api = IrohaApiSingletone.getIrohaApiInstance();
 
 
-    api.transaction(transaction).blockingSubscribe(observer);
+    api.transaction(transaction).publish().blockingSubscribe(observer);
     val observer1 =TransactionStatusObserver.builder()
             // executed when stateless or stateful validation is failed
             .onTransactionFailed(t -> System.out.println(String.format(

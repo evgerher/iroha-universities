@@ -1,0 +1,231 @@
+{
+  "blockV1": {
+    "payload": {
+      "transactions": [{
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "addPeer": {
+                "peer": {
+                  "address": "192.168.0.2:10001",
+                  "peerKey": "0D1EB05E4DD969030F3CC21ACF8B01EBE539F7CDB42B5643E8DECE2D661BA848"
+                }
+              }
+            }, {
+              "addPeer": {
+                "peer": {
+                  "address": "192.168.0.3:10002",
+                  "peerKey": "38BC2273374564CFB0F15789A1835589B1CB9B9922DD99F3D125BFBFFAE23DA9"
+                }
+              }
+            }],
+            "createdTime": "1556474383601",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createRole": {
+                "roleName": "uirole",
+                "permissions": ["can_add_asset_qty", "can_add_domain_asset_qty", "can_create_asset", "can_read_assets", "can_receive", "can_transfer", "can_get_my_acc_ast", "can_get_my_txs", "can_get_all_acc_ast", "can_get_all_acc_detail", "can_create_account"]
+              }
+            }],
+            "createdTime": "1556474383659",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createRole": {
+                "roleName": "kairole",
+                "permissions": ["can_add_asset_qty", "can_add_domain_asset_qty", "can_create_asset", "can_read_assets", "can_receive", "can_transfer", "can_get_my_acc_ast", "can_get_my_txs", "can_get_all_acc_ast", "can_get_all_acc_detail", "can_create_account"]
+              }
+            }],
+            "createdTime": "1556474383672",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createRole": {
+                "roleName": "applicant",
+                "permissions": ["can_receive", "can_transfer", "can_get_my_acc_ast", "can_get_my_txs"]
+              }
+            }],
+            "createdTime": "1556474383672",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createDomain": {
+                "domainId": "uidomain",
+                "defaultRole": "uirole"
+              }
+            }],
+            "createdTime": "1556474383672",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createDomain": {
+                "domainId": "kaidomain",
+                "defaultRole": "kairole"
+              }
+            }],
+            "createdTime": "1556474383674",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createDomain": {
+                "domainId": "universitySelection",
+                "defaultRole": "applicant"
+              }
+            }],
+            "createdTime": "1556474383674",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAccount": {
+                "accountName": "uiaccount",
+                "domainId": "uidomain",
+                "publicKey": "0D1EB05E4DD969030F3CC21ACF8B01EBE539F7CDB42B5643E8DECE2D661BA848"
+              }
+            }],
+            "createdTime": "1556474383674",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAccount": {
+                "accountName": "kaiaccount",
+                "domainId": "kaidomain",
+                "publicKey": "38BC2273374564CFB0F15789A1835589B1CB9B9922DD99F3D125BFBFFAE23DA9"
+              }
+            }],
+            "createdTime": "1556474383676",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "wild",
+                "domainId": "uidomain"
+              }
+            }],
+            "createdTime": "1556474383676",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "csuidomain",
+                "domainId": "uidomain"
+              }
+            }],
+            "createdTime": "1556474383677",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "addAssetQuantity": {
+                "assetId": "csuidomain#uidomain",
+                "amount": "1"
+              }
+            }],
+            "creatorAccountId": "uiaccount@uidomain",
+            "createdTime": "1556474383677",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "wild",
+                "domainId": "kaidomain"
+              }
+            }],
+            "createdTime": "1556474383679",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "cskaidomain",
+                "domainId": "kaidomain"
+              }
+            }],
+            "createdTime": "1556474383679",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "addAssetQuantity": {
+                "assetId": "cskaidomain#kaidomain",
+                "amount": "1"
+              }
+            }],
+            "creatorAccountId": "kaiaccount@kaidomain",
+            "createdTime": "1556474383679",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "wild",
+                "domainId": "universitySelection"
+              }
+            }],
+            "createdTime": "1556474383679",
+            "quorum": 1
+          }
+        }
+      }],
+      "txNumber": 16,
+      "height": "1",
+      "createdTime": "1556474383680"
+    }
+  }
+}
