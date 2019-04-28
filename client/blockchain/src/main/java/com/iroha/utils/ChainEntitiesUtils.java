@@ -58,4 +58,11 @@ public class ChainEntitiesUtils {
 
     }
 
+    public static String bytesToHex(byte[] hashInBytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashInBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 }

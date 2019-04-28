@@ -141,10 +141,10 @@ public class MongoDBConnector { // todo: dependency injection
     insertDoc(APPLICANTS_COLLECTION, applicant);
   }
 
-  public Applicant getApplicant(String pubkey) {
+  public Applicant getApplicant(String usercode) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
-      return collection.find(eq("pubkey", pubkey))
+      return collection.find(eq("userCode", usercode))
           .map(jsonToObject(Applicant.class))
           .first();
     }

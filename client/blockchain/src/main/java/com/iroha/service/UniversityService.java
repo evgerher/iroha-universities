@@ -1,6 +1,7 @@
 package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
+import io.reactivex.Observer;
 import java.security.KeyPair;
 
 import com.iroha.model.Applicant;
@@ -12,6 +13,7 @@ import iroha.protocol.TransactionOuterClass;
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
 import jp.co.soramitsu.iroha.java.Transaction;
+import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,16 +37,15 @@ public class UniversityService {
     api = IrohaApiSingletone.getIrohaApiInstance();
   }
 
-  public KeyPair createNewApplicantAccount(Applicant applicant) {
-    val keys = ChainEntitiesUtils.generateKey();
+  public String createNewApplicantAccount(Applicant applicant, KeyPair keys, InlineTransactionStatusObserver observer) {
     val applicantAccountName = ChainEntitiesUtils.getApplicantAccountName(applicant);
     val domain = ChainEntitiesUtils.getUniversityDomain(university);
     val transaction = Transaction.builder(ChainEntitiesUtils.getUniversityAccountName(university))
         .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, domain), keys.getPublic())
         .sign(universityKeyPair)
         .build();
-    api.transaction(transaction).blockingSubscribe();
-    return keys;
+    api.transaction(transaction).subscribeWith(observer);
+    return ChainEntitiesUtils.bytesToHex(transaction.toByteArray());
   }
 
   public Observable getWildTokensTransaction(Applicant applicant) {

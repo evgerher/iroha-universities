@@ -1,8 +1,10 @@
 package com.iroha.controller;
 
-import com.iroha.model.applicant.ResponseApplicant;
-import com.iroha.model.applicant.ApplicantExchangeSpeciality;
-import com.iroha.model.applicant.ApplicantSelectSpeciality;
+import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.responses.ResponseApplicant;
+import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
+import com.iroha.model.applicant.requests.SelectSpecialityRequest;
+import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.UserCode;
 import com.iroha.service.ApplicantService;
 
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,9 +24,9 @@ public class ApplicantController {
   private final ApplicantService applicantService = null; // todo me
 
   @RequestMapping(value="/register", method = RequestMethod.POST)
-  public UserCode registerApplicant(@RequestParam String name) {
-    logger.info("Register new applicant with name={}", name);
-    return applicantService.registerApplicant(name);
+  public TxHash registerApplicant(@RequestBody ApplicantRegisterRequest request) {
+    logger.info("Register new applicant={}", request);
+    return applicantService.registerApplicant(request);
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
@@ -36,7 +37,7 @@ public class ApplicantController {
 
   @RequestMapping(value="/select", method = RequestMethod.POST)
   public void selectSpeciality(@RequestHeader(value="User-Code") String userCode,
-      @RequestBody ApplicantSelectSpeciality applicantSelect) {
+      @RequestBody SelectSpecialityRequest applicantSelect) {
     // todo: return track code ???
 
     logger.info("ResponseApplicant with usercode={} selects speciality code={}, university={}",
@@ -46,7 +47,7 @@ public class ApplicantController {
 
   @RequestMapping(value="/exchange", method = RequestMethod.POST)
   public void exchangeAssets(@RequestHeader(value="User-Code") String userCode,
-      @RequestBody ApplicantExchangeSpeciality applicantExchange) {
+      @RequestBody ExchangeSpecialityRequest applicantExchange) {
     // todo: return track code ???
 
     logger.info("ResponseApplicant with usercode={} exchanges speciality from={}, to={}",

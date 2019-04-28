@@ -1,4 +1,4 @@
-package com.iroha.model.applicant;
+package com.iroha.model.applicant.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
