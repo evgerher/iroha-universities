@@ -76,7 +76,8 @@ public class IrohaMain {
   private static void writeGenesisToFile(BlockOuterClass.Block genesis, String path) throws FileNotFoundException {
     FileOutputStream file = new FileOutputStream(path);
     try {
-      file.write(genesis.toString().getBytes());
+      System.out.println(genesis.getBlockV1().toString());
+      file.write(genesis.getBlockV1().toString().getBytes());
       file.flush();
       file.close();
     } catch (IOException e) {

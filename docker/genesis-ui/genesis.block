@@ -1,154 +1,153 @@
-block_v1 {
-  payload {
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_role {
-              role_name: "uirole"
-              permissions: can_add_asset_qty
-              permissions: can_add_domain_asset_qty
-              permissions: can_create_asset
-              permissions: can_read_assets
-              permissions: can_receive
-              permissions: can_transfer
-              permissions: can_get_my_acc_ast
-              permissions: can_get_my_txs
-              permissions: can_get_all_acc_ast
-              permissions: can_get_all_acc_detail
-            }
+payload {
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_role {
+            role_name: "uirole"
+            permissions: can_add_asset_qty
+            permissions: can_add_domain_asset_qty
+            permissions: can_create_asset
+            permissions: can_read_assets
+            permissions: can_receive
+            permissions: can_transfer
+            permissions: can_get_my_acc_ast
+            permissions: can_get_my_txs
+            permissions: can_get_all_acc_ast
+            permissions: can_get_all_acc_detail
+            permissions: can_create_account
           }
-          created_time: 1556387839629
-          quorum: 1
         }
+        created_time: 1556456708104
+        quorum: 1
       }
     }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_role {
-              role_name: "applicant"
-              permissions: can_receive
-              permissions: can_transfer
-              permissions: can_get_my_acc_ast
-              permissions: can_get_my_txs
-            }
-          }
-          created_time: 1556387839644
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_domain {
-              domain_id: "uidomain"
-              default_role: "uirole"
-            }
-          }
-          created_time: 1556387839644
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_domain {
-              domain_id: "universitySelection"
-              default_role: "applicant"
-            }
-          }
-          created_time: 1556387839645
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_account {
-              account_name: "uiaccount"
-              domain_id: "uidomain"
-              public_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
-            }
-          }
-          created_time: 1556387839645
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "wild"
-              domain_id: "uidomain"
-            }
-          }
-          created_time: 1556387839647
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "csui"
-              domain_id: "uidomain"
-            }
-          }
-          commands {
-            add_asset_quantity {
-              asset_id: "cs#ui"
-              amount: "1"
-            }
-          }
-          created_time: 1556387839649
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "wild"
-              domain_id: "universitySelection"
-            }
-          }
-          created_time: 1556387839650
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            add_peer {
-              peer {
-                address: "0.0.0.0:10001"
-                peer_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
-              }
-            }
-          }
-          created_time: 1556387839651
-          quorum: 1
-        }
-      }
-    }
-    tx_number: 9
-    height: 1
-    created_time: 1556387839654
   }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_role {
+            role_name: "applicant"
+            permissions: can_receive
+            permissions: can_transfer
+            permissions: can_get_my_acc_ast
+            permissions: can_get_my_txs
+          }
+        }
+        created_time: 1556456708161
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_domain {
+            domain_id: "uidomain"
+            default_role: "uirole"
+          }
+        }
+        created_time: 1556456708161
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_domain {
+            domain_id: "universitySelection"
+            default_role: "applicant"
+          }
+        }
+        created_time: 1556456708163
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_account {
+            account_name: "ui_account"
+            domain_id: "uidomain"
+            public_key: "B2556740C302B8FF35E1381100B4F6E06A50DB0D61A6B8C04C42ED8382CEB1DA"
+          }
+        }
+        created_time: 1556456708163
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_asset {
+            asset_name: "wild"
+            domain_id: "uidomain"
+          }
+        }
+        created_time: 1556456708167
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_asset {
+            asset_name: "csui"
+            domain_id: "uidomain"
+          }
+        }
+        commands {
+          add_asset_quantity {
+            asset_id: "cs#ui"
+            amount: "1"
+          }
+        }
+        created_time: 1556456708168
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          create_asset {
+            asset_name: "wild"
+            domain_id: "universitySelection"
+          }
+        }
+        created_time: 1556456708170
+        quorum: 1
+      }
+    }
+  }
+  transactions {
+    payload {
+      reduced_payload {
+        commands {
+          add_peer {
+            peer {
+              address: "0.0.0.0:10001"
+              peer_key: "B2556740C302B8FF35E1381100B4F6E06A50DB0D61A6B8C04C42ED8382CEB1DA"
+            }
+          }
+        }
+        created_time: 1556456708170
+        quorum: 1
+      }
+    }
+  }
+  tx_number: 9
+  height: 1
+  created_time: 1556456708174
 }
