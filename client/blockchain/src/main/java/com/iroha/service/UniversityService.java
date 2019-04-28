@@ -2,6 +2,8 @@ package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
 import io.reactivex.Observer;
+import iroha.protocol.QryResponses;
+import iroha.protocol.QryResponses.AccountAsset;
 import java.security.KeyPair;
 
 import com.iroha.model.Applicant;
@@ -10,6 +12,7 @@ import com.iroha.model.university.University;
 import com.iroha.utils.IrohaApiSingletone;
 import io.reactivex.Observable;
 import iroha.protocol.TransactionOuterClass;
+import java.util.List;
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
 import jp.co.soramitsu.iroha.java.Transaction;
@@ -129,5 +132,16 @@ public class UniversityService {
         .orElse(0);
   }
 
-
+  public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
+    val api = IrohaApiSingletone.getIrohaApiInstance();
+    val query = Query.builder(
+        ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
+            .getUniversityDomain(university)), 1)
+        .getAccountAssets(
+            ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils
+                .getUniversityDomain(university)))
+        .buildSigned(universityKeyPair);
+    val balance = api.query(query);
+    return balance.getAccountAssetsResponse().getAccountAssetsList();
+  }
 }

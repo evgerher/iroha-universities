@@ -15,9 +15,11 @@ import com.iroha.service.ApplicantService;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 
+import iroha.protocol.QryResponses.AccountAsset;
 import java.security.KeyPair;
 import java.util.List;
 
+import java.util.stream.Collectors;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 
@@ -80,10 +82,10 @@ public class ApplicantServiceImpl implements ApplicantService {
   @Override
   public ApplicantResponse getApplicant(UserCode userCode) {
     Applicant applicant = mongoConnector.getApplicant(userCode.getUserCode());
-
-
-    // todo: retrieve assets from iroha
-    List<Asset> assets = null;
+    List<AccountAsset> irohaAssets = universityService.getAllAssertsOfApplicant(applicant);
+    List<Asset> assets = irohaAssets.stream()
+        .map(this::convertAsset)
+        .collect(Collectors.toList());
 
     return new ApplicantResponse(applicant, assets);
   }
@@ -96,5 +98,12 @@ public class ApplicantServiceImpl implements ApplicantService {
   @Override
   public void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange) {
 
+  }
+
+  private Asset convertAsset(AccountAsset irohaAsset) {
+    String name = irohaAsset.getAssetId();
+    String domain = irohaAsset.getAssetId();
+    int quantity = Integer.parseInt(irohaAsset.getBalance());
+    return new Asset(name, domain, quantity);
   }
 }
