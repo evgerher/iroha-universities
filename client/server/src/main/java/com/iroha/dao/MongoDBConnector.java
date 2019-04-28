@@ -4,6 +4,7 @@ import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.iroha.model.Applicant;
+import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 
@@ -33,6 +34,7 @@ public class MongoDBConnector { // todo: dependency injection
   private final static String SPECIALITY_COLLECTION = "speciality";
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static String APPLICANTS_COLLECTION = "applicants";
+  private final static String REGISTRATION_COLLECTION = "registration";
   private final Gson gson = new GsonBuilder().create();
 
   private static void initializeCollections() {
@@ -40,7 +42,7 @@ public class MongoDBConnector { // todo: dependency injection
       MongoDatabase db = client.getDatabase(database);
       ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
 
-      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION};
+      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION, REGISTRATION_COLLECTION};
 
       for (String collection : expected) {
         if (!collections.contains(collection)) {
@@ -84,9 +86,13 @@ public class MongoDBConnector { // todo: dependency injection
   }
 
   private void insertDoc(String collectionName, Object object) {
+    Document doc = Document.parse(object.toString());
+    insertDoc(collectionName, doc);
+  }
+
+  private void insertDoc(String collectionName, Document doc) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(collectionName);
-      Document doc = Document.parse(object.toString());
       collection.insertOne(doc);
     }
   }
@@ -148,5 +154,24 @@ public class MongoDBConnector { // todo: dependency injection
           .map(jsonToObject(Applicant.class))
           .first();
     }
+  }
+
+  public void insertRegistrationMapping(RegistrationTx registration) {
+    insertDoc(REGISTRATION_COLLECTION, Document.parse(registration.toString()));
+  }
+
+  public RegistrationTx getRegistrationMapping(String txHash) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(REGISTRATION_COLLECTION);
+      Document doc = collection.findOneAndDelete(eq("txHash", txHash));
+      return jsonToObject(doc.toJson(), RegistrationTx.class);
+    } catch (Exception e) {
+      logger.error("Not found by tx={}, error={}", txHash, e);
+      throw e;
+    }
+  }
+
+  private <T> T jsonToObject(String json, Class<T> targetClass) {
+    return gson.fromJson(json, targetClass);
   }
 }

@@ -21,32 +21,33 @@ import jp.co.soramitsu.iroha.testcontainers.PeerConfig;
 public class IrohaMain {
 
   public static void main(String[] args) throws FileNotFoundException {
-    Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
-    University university = new University("ui", "ui", "192.168.0.2", 5134, Arrays.asList(speciality));
-//		IrohaContainer iroha = new IrohaContainer()
-//				.withPeerConfig(getPeerConfig(university));
-//		iroha.start();
-    List<University> universities = Arrays.asList(university);
-    Map<String, KeyPair> universitiesKeys = ChainEntitiesUtils.generateKeys(universities.stream()
-        .map(x -> x.getName())
-        .collect(Collectors.toList()));
-
-    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, universitiesKeys);
-    UniversityService service = new UniversityService(
-        universitiesKeys.get(university.getName()),
-        university);
-    Applicant applicant = new Applicant( "name", "surname");
-    KeyPair applicantKeys = service.createNewApplicantAccount(applicant);
-    applicant.setPubkey(applicantKeys.getPublic().toString());
-    applicant.setPkey(applicantKeys.getPrivate().toString());
-
-    Observable observable = service.getWildTokensTransaction(applicant);
-    observable.blockingSubscribe();
-    int balance = service
-        .getBalanceOfApplicant(applicant, ChainEntitiesUtils.Consts.WILD_ASSET_NAME);
-    System.out.println("_______________________________________________");
-    System.out.println(balance);
-    System.out.println("_______________________________________________");
+//    Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
+//    University university = new University("ui", "ui", "192.168.0.2", 5134, Arrays.asList(speciality));
+////		IrohaContainer iroha = new IrohaContainer()
+////				.withPeerConfig(getPeerConfig(university));
+////		iroha.start();
+//    List<University> universities = Arrays.asList(university);
+//    Map<String, KeyPair> universitiesKeys = ChainEntitiesUtils.generateKeys(universities.stream()
+//        .map(x -> x.getName())
+//        .collect(Collectors.toList()));
+//
+//    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, universitiesKeys);
+//    UniversityService service = new UniversityService(
+//        universitiesKeys.get(university.getName()),
+//        university);
+//    Applicant applicant = new Applicant( "name", "surname");
+//    service.createNewApplicantAccount(applicant, null);
+//    KeyPair applicantKeys = service.createNewApplicantAccount(applicant);
+//    applicant.setPubkey(applicantKeys.getPublic().toString());
+//    applicant.setPkey(applicantKeys.getPrivate().toString());
+//
+//    Observable observable = service.getWildTokensTransaction(applicant);
+//    observable.blockingSubscribe();
+//    int balance = service
+//        .getBalanceOfApplicant(applicant, ChainEntitiesUtils.Consts.WILD_ASSET_NAME);
+//    System.out.println("_______________________________________________");
+//    System.out.println(balance);
+//    System.out.println("_______________________________________________");
   }
 
   private static String bytesToHex(byte[] hashInBytes) {

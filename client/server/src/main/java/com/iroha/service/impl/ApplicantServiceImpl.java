@@ -5,11 +5,12 @@ import com.iroha.model.Applicant;
 import com.iroha.model.Asset;
 import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
-import com.iroha.model.applicant.responses.ResponseApplicant;
+import com.iroha.model.applicant.responses.ApplicantResponse;
 import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
 import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.UserCode;
 
+import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.service.ApplicantService;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
@@ -54,10 +55,12 @@ public class ApplicantServiceImpl implements ApplicantService {
         })
         .onError(e -> logger.error("Error occured={}", e))
         .onTransactionCommitted((t) -> {
-              logger.info("Successfully commited tx={}, now store applicant with usercode={}", t,
+              logger.info("Successfully commited tx={}, now store applicant with usercode={}", t.getTxHash(),
                   applicant.getUserCode());
               // Store applicant into db
               mongoConnector.insertApplicant(applicant);
+              mongoConnector.insertRegistrationMapping(new RegistrationTx(t.getTxHash(),
+                  applicant.getUserCode()));
         })
         .onComplete(() -> {
           logger.info("Transaction completed");
@@ -68,14 +71,21 @@ public class ApplicantServiceImpl implements ApplicantService {
   }
 
   @Override
-  public ResponseApplicant getApplicant(UserCode userCode) {
+  public UserCode getUserCode(String txHash) {
+    logger.info("Request usercode mapping for txhash={}", txHash);
+    RegistrationTx registrationTx = mongoConnector.getRegistrationMapping(txHash);
+    return new UserCode(registrationTx.getUserCode());
+  }
+
+  @Override
+  public ApplicantResponse getApplicant(UserCode userCode) {
     Applicant applicant = mongoConnector.getApplicant(userCode.getUserCode());
 
 
     // todo: retrieve assets from iroha
     List<Asset> assets = null;
 
-    return new ResponseApplicant(applicant, assets);
+    return new ApplicantResponse(applicant, assets);
   }
 
   @Override
