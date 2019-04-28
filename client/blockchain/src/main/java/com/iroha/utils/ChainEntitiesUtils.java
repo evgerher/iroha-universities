@@ -49,6 +49,10 @@ public class ChainEntitiesUtils {
         return crypto.generateKeypair();
     }
 
+    public static byte[] hexToBytes(String encodedKeyPair) {
+        return encodedKeyPair.getBytes();
+    }
+
     public final static class Consts{
         public static final String UNIVERSITIES_DOMAIN = "universitySelection";
         public static final String APPLICANT_ROLE = "applicant";

@@ -8,6 +8,7 @@ import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 
+import com.iroha.utils.ChainEntitiesUtils;
 import com.mongodb.Function;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -15,6 +16,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.Key;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
@@ -37,6 +45,7 @@ public class MongoDBConnector {
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static String APPLICANTS_COLLECTION = "applicants";
   private final static String REGISTRATION_COLLECTION = "registration";
+  private final static String UNIVERSITY_KEYS_COLLECTION = "registration";
   private final Gson gson = new GsonBuilder().create();
 
   private static void initializeCollections() {
@@ -44,7 +53,8 @@ public class MongoDBConnector {
       MongoDatabase db = client.getDatabase(database);
       ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
 
-      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION, REGISTRATION_COLLECTION};
+      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION,
+          REGISTRATION_COLLECTION, UNIVERSITY_KEYS_COLLECTION};
 
       for (String collection : expected) {
         if (!collections.contains(collection)) {
@@ -175,5 +185,55 @@ public class MongoDBConnector {
 
   private <T> T jsonToObject(String json, Class<T> targetClass) {
     return gson.fromJson(json, targetClass);
+  }
+
+  public void insertUniversityKeys(University uni, KeyPair keys) {
+    try (MongoClient client = getClient()) {
+      String encodedKeys = encodeKeyPair(keys);
+      Document doc = new Document();
+      doc.append("university", uni.getName());
+      doc.append("keypair", encodedKeys);
+      insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
+    } catch (IOException e) {
+      //todo: me
+    }
+  }
+
+  public KeyPair getUniversityKeys(String name) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
+      return collection.find(eq("university", name))
+          .map(pair -> {
+            String encodedKeyPair = (String) pair.get("keypair");
+            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
+            return decodeKeyPair(bytes);
+          })
+          .first();
+    }
+  }
+
+  private String encodeKeyPair(KeyPair keys) throws IOException {
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+      try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
+        ous.writeObject(keys);
+        byte[] bytes = baos.toByteArray();
+        return ChainEntitiesUtils.bytesToHex(bytes);
+      }
+    } catch (IOException e) {
+      logger.error("Exception during key storing, {}", e);
+      throw e;
+    }
+  }
+
+  private KeyPair decodeKeyPair(byte[] bytes) {
+    try (ByteArrayInputStream bi = new ByteArrayInputStream(bytes)) {
+      try (ObjectInputStream oi = new ObjectInputStream(bi)) {
+        Object obj = oi.readObject();
+        return (KeyPair) obj;
+      }
+    } catch (Exception e) {
+      logger.error("Unable to parse class from byte object");
+      return null;
+    }
   }
 }

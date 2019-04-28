@@ -5,6 +5,8 @@ import com.iroha.model.university.University;
 
 import com.iroha.dao.MongoDBConnector;
 
+import com.iroha.utils.ChainEntitiesUtils;
+import java.security.KeyPair;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,9 @@ public class UniversityController {
   public void saveUniversity(@RequestBody University university) {
     university.validate();
     logger.info(university.toString());
+    KeyPair keys = ChainEntitiesUtils.generateKey();
     mongoConnector.insertUniversity(university);
+    mongoConnector.insertUniversityKeys(university, keys);
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
