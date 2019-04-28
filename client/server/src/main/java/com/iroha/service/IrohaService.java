@@ -8,7 +8,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface IrohaService {
-  Map<String, KeyPair> generateKeyPairsUniversities(List<University> universities);
-  KeyPair generateKeyPair(Applicant applicant);
   void startBlockchain(List<University> universities);
 }

@@ -3,17 +3,15 @@ package com.iroha.dao;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.iroha.dao.model.UniversityKeys;
 import com.iroha.model.Applicant;
 import com.iroha.model.applicant.responses.RegistrationTx;
-import com.iroha.model.university.Speciality;
-import com.iroha.model.university.University;
-
+import com.iroha.model.university.*;
 import com.iroha.utils.ChainEntitiesUtils;
+
 import com.mongodb.Function;
 import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.Indexes;
 
 import java.io.ByteArrayInputStream;
@@ -210,6 +208,21 @@ public class MongoDBConnector {
             return decodeKeyPair(bytes);
           })
           .first();
+    }
+  }
+
+  public List<UniversityKeys> getUniversityKeys() {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
+      return collection.find()
+          .map(pair -> {
+            String name = (String) pair.get("university");
+            String encodedKeyPair = (String) pair.get("keypair");
+            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
+            KeyPair keys = decodeKeyPair(bytes);
+
+            return new UniversityKeys(name, keys);
+          }).into(new ArrayList<>());
     }
   }
 
