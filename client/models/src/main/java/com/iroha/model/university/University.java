@@ -3,6 +3,8 @@ package com.iroha.model.university;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.security.KeyPair;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,10 +19,17 @@ public class University {
   private String description;
   private List<Speciality> specialities;
   private static final Gson gson = new GsonBuilder().create();
+  private KeyPair peerKey;
+  private String uri;
 
   public University(String name, String description) {
     this.name = name;
     this.description = description;
+  }
+  public University(String name, String description, List<Speciality> specialities) {
+    this.name = name;
+    this.description = description;
+    this.specialities = specialities;
   }
 
   @Override

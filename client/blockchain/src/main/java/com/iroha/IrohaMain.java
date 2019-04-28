@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,9 +31,7 @@ import jp.co.soramitsu.iroha.testcontainers.IrohaContainer;
 import jp.co.soramitsu.iroha.testcontainers.PeerConfig;
 import lombok.val;
 
-import static com.iroha.utils.ChainEntitiesUtils.getUniversityAccountName;
-import static com.iroha.utils.ChainEntitiesUtils.getUniversityDomain;
-import static com.iroha.utils.ChainEntitiesUtils.universitiesKeys;
+import static com.iroha.utils.ChainEntitiesUtils.*;
 import static java.lang.Thread.sleep;
 
 public class IrohaMain {
@@ -42,6 +41,13 @@ public class IrohaMain {
     University university = new University("ui", "ui", Arrays.asList(speciality));
     University kai = new University("kai", "kai", Arrays.asList(speciality));
     University kfu = new University("kfu", "kfu", Arrays.asList(speciality));
+    kai.setPeerKey(ChainEntitiesUtils.generateKey());
+    university.setUri("192.168.0.3:10002");
+    kai.setUri("192.168.0.2:10001");
+    kfu.setUri("192.168.0.4:10003");
+    kfu.setPeerKey(ChainEntitiesUtils.generateKey());
+    university.setPeerKey(ChainEntitiesUtils.generateKey());
+    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
 //		IrohaContainer iroha = new IrohaContainer()
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
@@ -49,6 +55,9 @@ public class IrohaMain {
     writeGenesisToFile(genesis,"./docker/genesis-kai/genesis.block");
     writeGenesisToFile(genesis,"./docker/genesis-ui/genesis.block");
     writeGenesisToFile(genesis,"./docker/genesis-kfu/genesis.block");
+
+    saveKey(university.getPeerKey(),"./docker/genesis-ui");
+    saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
     System.out.println("genesis generated");
     File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
@@ -169,6 +178,22 @@ public class IrohaMain {
       file.write(JsonFormat.printer().print(genesis).getBytes());
       file.flush();
       file.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void saveKey(KeyPair keyPair, String path) throws FileNotFoundException {
+    FileOutputStream filePub = new FileOutputStream(path+"/node.pub");
+    FileOutputStream filePriv = new FileOutputStream(path+"/node.priv");
+
+    try {
+      filePub.write(bytesToHex(keyPair.getPublic().getEncoded()).getBytes());
+      filePub.flush();
+      filePub.close();
+      filePriv.write(bytesToHex(keyPair.getPrivate().getEncoded()).getBytes());
+      filePriv.flush();
+      filePriv.close();
     } catch (IOException e) {
       e.printStackTrace();
     }

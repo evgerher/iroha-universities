@@ -20,11 +20,11 @@ public class GenesisGenerator {
     public static BlockOuterClass.Block getGenesisBlock(List<University> universities) {
         ChainEntitiesUtils.generateKeys(universities);
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
-        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-                .addPeer("192.168.0.3:10002", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
-//                .addPeer("192.168.0.2:10001", ChainEntitiesUtils.universitiesKeys.get("kai").getPublic())
-//                .addPeer("192.168.0.4:10003", ChainEntitiesUtils.universitiesKeys.get("kfu").getPublic())
-                .build().build());
+        for( University university: universities) {
+           genesisbuilder = genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+                    .addPeer(university.getUri(), university.getPeerKey().getPublic())
+                    .build().build());
+        }
         for (Transaction transaction : getRequiredRoles(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
