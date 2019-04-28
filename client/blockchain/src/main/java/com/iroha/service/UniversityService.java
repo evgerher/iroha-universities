@@ -2,12 +2,15 @@ package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
 import java.security.KeyPair;
+import java.util.List;
 
 import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
 
 import com.iroha.utils.IrohaApiSingletone;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import iroha.protocol.QryResponses;
 import iroha.protocol.TransactionOuterClass;
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
@@ -36,15 +39,16 @@ public class UniversityService {
     api = IrohaApiSingletone.getIrohaApiInstance();
   }
 
-  public Observable createNewApplicantAccount(Applicant applicant, KeyPair keys) {
+  public void createNewApplicantAccount(Applicant applicant, KeyPair keys, Observer observer) {
     val applicantAccountName = ChainEntitiesUtils.getApplicantAccountName(applicant);
     val domain = ChainEntitiesUtils.getUniversityDomain(university);
-    System.out.println(universityKeyPair.toString());
-    val transaction = Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),Consts.UNIVERSITIES_DOMAIN))
-        .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, Consts.UNIVERSITIES_DOMAIN), universityKeyPair.getPublic())
+    val transaction = Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
+        .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, Consts.UNIVERSITIES_DOMAIN), keys.getPublic())
         .sign(universityKeyPair)
-        .build();
-    return api.transaction(transaction).distinct();
+            .build();
+    System.out.println("Transaction sent");
+    api.transaction(transaction).subscribe(observer);
+    System.out.println("finished");
   }
 
   public Observable getWildTokensTransaction(Applicant applicant) {
@@ -126,6 +130,20 @@ public class UniversityService {
     return assetWildOptional
         .map(a -> Integer.parseInt(a.getBalance()))
         .orElse(0);
+  }
+
+  public List<QryResponses.AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
+    val api = IrohaApiSingletone.getIrohaApiInstance();
+    val query = Query.builder(
+            ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
+                    .getUniversityDomain(university)), 1)
+            .getAccountAssets(
+                    ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils
+                            .getUniversityDomain(university)))
+            .buildSigned(universityKeyPair);
+    val balance = api.query(query);
+    return balance.getAccountAssetsResponse().getAccountAssetsList();
+
   }
 
 

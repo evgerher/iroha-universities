@@ -36,7 +36,7 @@ public class ChainEntitiesUtils {
     }
 
     public static String getUniversityAccountName(University university){
-        return university.getName()+"_account";
+        return university.getName()+"account";
     }
 
     public static String getAccountId(String accountName, String domain){
@@ -50,7 +50,6 @@ public class ChainEntitiesUtils {
         return crypto.generateKeypair();
     }
     public static String bytesToHex(byte[] hashInBytes) {
-
         StringBuilder sb = new StringBuilder();
         for (byte b : hashInBytes) {
             sb.append(String.format("%02x", b));

@@ -6,6 +6,7 @@ import com.iroha.utils.ChainEntitiesUtils;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
+import java.math.BigDecimal;
 import java.util.*;
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
@@ -19,6 +20,11 @@ public class GenesisGenerator {
     public static BlockOuterClass.Block getGenesisBlock(List<University> universities) {
         ChainEntitiesUtils.generateKeys(universities);
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
+        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+                .addPeer("192.168.0.3:10002", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+//                .addPeer("192.168.0.2:10001", ChainEntitiesUtils.universitiesKeys.get("kai").getPublic())
+//                .addPeer("192.168.0.4:10003", ChainEntitiesUtils.universitiesKeys.get("kfu").getPublic())
+                .build().build());
         for (Transaction transaction : getRequiredRoles(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
@@ -32,9 +38,7 @@ public class GenesisGenerator {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
 
-        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
-                .build().build());
+
         return genesisbuilder.build();
     }
 
@@ -46,11 +50,14 @@ public class GenesisGenerator {
                     .createAsset(Consts.WILD_ASSET_NAME, ChainEntitiesUtils.getUniversityDomain(university), 0)
                     .build());
             for (Speciality speciality : university.getSpecialities()) {
-                String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), university.getName());
-                String assetId = ChainEntitiesUtils.getAssetId(speciality.getName(), university.getName());
-                transactions.add(Transaction.builder(null)
+                String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));
+                String assetId = ChainEntitiesUtils.getAssetId(assetName, getUniversityDomain(university));
+                transactions.add(Transaction
+                        .builder(null)
                         .createAsset(assetName, ChainEntitiesUtils.getUniversityDomain(university), 0)
-                        .addAssetQuantity(assetId, Integer.toString(speciality.getQuantity()))
+                        .build());
+                transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
+                        .addAssetQuantity(assetId, new BigDecimal(speciality.getQuantity()))
                         .build());
 
             }

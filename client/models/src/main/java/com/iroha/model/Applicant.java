@@ -20,6 +20,10 @@ public class Applicant {
 
 
     public String getId(){
-        return pubkey.replaceAll("[0-9]","");
+        String id =  pubkey.replaceAll("[0-9]{1,30}","");
+        if (id.length()>30){
+            id = id.substring(0,30);
+        }
+        return id;
     }
 }
