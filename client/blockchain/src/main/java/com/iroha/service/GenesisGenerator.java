@@ -32,9 +32,9 @@ public class GenesisGenerator {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
 
-        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
-                .build().build());
+//        genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
+//                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+//                .build().build());
         return genesisbuilder.build();
     }
 
@@ -93,7 +93,8 @@ public class GenesisGenerator {
                                     RolePermission.can_get_my_acc_ast,
                                     RolePermission.can_get_my_txs,
                                     RolePermission.can_get_all_acc_ast,
-                                    RolePermission.can_get_all_acc_detail
+                                    RolePermission.can_get_all_acc_detail,
+                                    RolePermission.can_create_account
                             )
                     ).build());
 

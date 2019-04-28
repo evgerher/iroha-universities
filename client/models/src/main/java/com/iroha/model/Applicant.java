@@ -17,4 +17,9 @@ public class Applicant {
         this.name = name;
         this.surname = surname;
     }
+
+
+    public String getId(){
+        return pubkey.replaceAll("[0-9]","");
+    }
 }

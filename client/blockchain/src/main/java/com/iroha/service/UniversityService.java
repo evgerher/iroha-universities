@@ -36,16 +36,15 @@ public class UniversityService {
     api = IrohaApiSingletone.getIrohaApiInstance();
   }
 
-  public KeyPair createNewApplicantAccount(Applicant applicant) {
-    val keys = ChainEntitiesUtils.generateKey();
+  public Observable createNewApplicantAccount(Applicant applicant, KeyPair keys) {
     val applicantAccountName = ChainEntitiesUtils.getApplicantAccountName(applicant);
     val domain = ChainEntitiesUtils.getUniversityDomain(university);
-    val transaction = Transaction.builder(ChainEntitiesUtils.getUniversityAccountName(university))
-        .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, domain), keys.getPublic())
+    System.out.println(universityKeyPair.toString());
+    val transaction = Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),Consts.UNIVERSITIES_DOMAIN))
+        .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, Consts.UNIVERSITIES_DOMAIN), universityKeyPair.getPublic())
         .sign(universityKeyPair)
         .build();
-    api.transaction(transaction).blockingSubscribe();
-    return keys;
+    return api.transaction(transaction).distinct();
   }
 
   public Observable getWildTokensTransaction(Applicant applicant) {
@@ -99,7 +98,7 @@ public class UniversityService {
         .getAccountId(university_account, ChainEntitiesUtils.getUniversityDomain(university));
     String applicationAccountId = ChainEntitiesUtils
         .getAccountId(applicant_account, ChainEntitiesUtils.getUniversityDomain(university));
-    return Transaction.builder(university_account)
+    return Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),Consts.UNIVERSITIES_DOMAIN))
         .addAssetQuantity(ChainEntitiesUtils.getAssetId(assetType, university.getName()), assetsQuantity.toString())
         .transferAsset(universityAccountId, applicationAccountId,
             ChainEntitiesUtils.getAssetId(assetType, university.getName())

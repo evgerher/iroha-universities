@@ -8,28 +8,57 @@ import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 import io.reactivex.Observable;
 import iroha.protocol.BlockOuterClass;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Arrays;
+
+import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import jp.co.soramitsu.iroha.testcontainers.PeerConfig;
+
+import static java.lang.Thread.sleep;
 
 public class IrohaMain {
 
-  public static void main(String[] args) throws FileNotFoundException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
     University university = new University("ui", "ui", Arrays.asList(speciality));
 //		IrohaContainer iroha = new IrohaContainer()
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
-    GenesisGenerator.getGenesisBlock(Arrays.asList(university));
+    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(Arrays.asList(university));
+    writeGenesisToFile(genesis,"./docker/genesis-kai/genesis.block");
+    writeGenesisToFile(genesis,"./docker/genesis-ui/genesis.block");
+    File dir = new File("./docker");
+    Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
+    sleep(5000);
     UniversityService service = new UniversityService(
         ChainEntitiesUtils.universitiesKeys.get(university.getName()),
         university);
+    System.out.println(ChainEntitiesUtils.bytesToHex(ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic().getEncoded()
+    ));
     Applicant applicant = new Applicant( "name", "surname");
-    KeyPair applicantKeys = service.createNewApplicantAccount(applicant);
-    applicant.setPubkey(applicantKeys.getPublic().toString());
+    KeyPair applicantKeys = ChainEntitiesUtils.generateKey();
+    applicant.setPubkey(ChainEntitiesUtils.bytesToHex(applicantKeys.getPublic().getEncoded()));
+    Observable accountCreation = service.createNewApplicantAccount(applicant, applicantKeys);
+    accountCreation.blockingSubscribe(TransactionStatusObserver.builder()
+            // executed when stateless or stateful validation is failed
+            .onTransactionFailed(t -> System.out.println(String.format(
+                    "transaction %s failed with msg: %s",
+                    t.getTxHash(),
+                    t.getErrOrCmdName()
+
+            )))
+            // executed when got any exception in handlers or grpc
+            .onError(e -> System.out.println("Failed with exception: " + e))
+            // executed when we receive "committed" status
+            .onTransactionCommitted((t) -> System.out.println("Committed :)"))
+            // executed when transfer is complete (failed or succeed) and observable is closed
+            .onComplete(() -> System.out.println("Complete"))
+            .build());
     applicant.setPkey(applicantKeys.getPrivate().toString());
 
     Observable observable = service.getWildTokensTransaction(applicant);
@@ -41,15 +70,7 @@ public class IrohaMain {
     System.out.println("_______________________________________________");
   }
 
-  private static String bytesToHex(byte[] hashInBytes) {
 
-    StringBuilder sb = new StringBuilder();
-    for (byte b : hashInBytes) {
-      sb.append(String.format("%02x", b));
-    }
-    return sb.toString();
-
-  }
 
 
   private static void writeGenesisToFile(BlockOuterClass.Block genesis, String path) throws FileNotFoundException {
