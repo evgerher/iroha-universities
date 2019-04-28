@@ -11,6 +11,7 @@ import com.iroha.service.ApplicantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,13 @@ import org.testcontainers.shaded.javax.ws.rs.QueryParam;
 @RequestMapping("/applicant")
 public class ApplicantController {
   private static final Logger logger = LoggerFactory.getLogger(ApplicantController.class);
-  private final ApplicantService applicantService = null; // todo me
+
+  private final ApplicantService applicantService;
+
+  @Autowired
+  public ApplicantController(ApplicantService applicantService) {
+    this.applicantService = applicantService;
+  }
 
   @RequestMapping(value="/register", method = RequestMethod.POST)
   public TxHash registerApplicant(@RequestBody ApplicantRegisterRequest request) {

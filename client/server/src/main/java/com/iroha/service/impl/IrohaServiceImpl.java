@@ -7,7 +7,9 @@ import iroha.protocol.BlockOuterClass;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
+@Service
 public class IrohaServiceImpl implements IrohaService {
   private BlockOuterClass.Block createGenesisBlock(List<University> universities, Map<String, KeyPair> keys) {
     return null;

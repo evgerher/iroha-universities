@@ -12,7 +12,6 @@ import com.iroha.model.applicant.UserCode;
 
 import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.service.ApplicantService;
-import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 
 import iroha.protocol.QryResponses.AccountAsset;
@@ -25,14 +24,19 @@ import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ApplicantServiceImpl implements ApplicantService {
   private static final Logger logger = LoggerFactory.getLogger(ApplicantServiceImpl.class);
 
-  private final UniversityService universityService;
+  private final UniversityWiredService universityService;
   private final MongoDBConnector mongoConnector;
 
-  public ApplicantServiceImpl(UniversityService universityService, MongoDBConnector mongoConnector) {
+  @Autowired
+  public ApplicantServiceImpl(UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
     this.universityService = universityService;
     this.mongoConnector = mongoConnector;
   }
