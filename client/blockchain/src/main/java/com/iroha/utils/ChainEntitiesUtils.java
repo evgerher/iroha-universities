@@ -10,22 +10,21 @@ import java.util.List;
 import java.util.Map;
 
 public class ChainEntitiesUtils {
-
-    public static volatile Map<String,KeyPair> universitiesKeys;
-
     public static String getAssetName(String specialityName,String universityName){
         return String.format("%s%s",specialityName, universityName);
     }
     public static String getAssetId(String specialityName,String universityName){
         return String.format("%s#%s",specialityName, universityName);
     }
-    public static Map<String,KeyPair> generateKeys(List<University> universities){
+    public static Map<String,KeyPair> generateKeys(List<String> names){
+        Map<String,KeyPair> mapping = new HashMap<>();
+
         Ed25519Sha3 crypto = new Ed25519Sha3();
-        universitiesKeys = new HashMap<>();
-        for(University university: universities){
-            universitiesKeys.put(university.getName(),crypto.generateKeypair());
+
+        for(String name: names){
+          mapping.put(name, crypto.generateKeypair());
         }
-        return universitiesKeys;
+        return mapping;
     }
     public static String getUniversityDomain(University university){
         return university.getName()+"domain";

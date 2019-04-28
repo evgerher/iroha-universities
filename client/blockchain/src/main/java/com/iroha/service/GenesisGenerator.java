@@ -6,18 +6,19 @@ import com.iroha.utils.ChainEntitiesUtils;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
+import java.security.KeyPair;
 import java.util.*;
+import java.util.stream.Collectors;
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
-import static com.iroha.utils.ChainEntitiesUtils.Consts.APPLICANT_ROLE;
-import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
-import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
 
 public class GenesisGenerator {
-    public static BlockOuterClass.Block getGenesisBlock(List<University> universities) {
-        ChainEntitiesUtils.generateKeys(universities);
+    public static BlockOuterClass.Block getGenesisBlock(List<University> universities, Map<String, KeyPair> universitiesKeys) {
+        ChainEntitiesUtils.generateKeys(universities.stream()
+            .map(x -> x.getName())
+            .collect(Collectors.toList()));
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
         for (Transaction transaction : getRequiredRoles(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
@@ -25,7 +26,7 @@ public class GenesisGenerator {
         for (Transaction transaction : getDomains(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
-        for (Transaction transaction : getAccounts(universities)) {
+        for (Transaction transaction : getAccounts(universities, universitiesKeys)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
         for (Transaction transaction : initialFunding(universities)) {
@@ -33,7 +34,7 @@ public class GenesisGenerator {
         }
 
         genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-                .addPeer("0.0.0.0:10001", ChainEntitiesUtils.universitiesKeys.get("ui").getPublic())
+                .addPeer("0.0.0.0:10001", universitiesKeys.get("ui").getPublic())
                 .build().build());
         return genesisbuilder.build();
     }
@@ -110,12 +111,12 @@ public class GenesisGenerator {
         return transactions;
     }
 
-    private static List<Transaction> getAccounts(List<University> universities) {
+    private static List<Transaction> getAccounts(List<University> universities, Map<String, KeyPair> universitiesKeys) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
             transactions.add(Transaction.builder(null)
                     .createAccount(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
-                        .getUniversityDomain(university), ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic())
+                        .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;

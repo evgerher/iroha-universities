@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,11 +46,6 @@ public class UniversityController {
     return mongoConnector.getUniversities();
   }
 
-  @RequestMapping(value = "/{shortName}", method=RequestMethod.GET)
-  public University getUniversityByName(@PathVariable("shortName") String uniName) {
-    return mongoConnector.getUniversity(uniName);
-  }
-
   @RequestMapping(value = "/speciality", method = RequestMethod.POST)
   public void saveSpeciality(@RequestBody Speciality speciality) {
     try {
@@ -72,6 +66,7 @@ public class UniversityController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
   @RequestMapping(value = "/speciality/all", method = RequestMethod.GET)
   public List<Speciality> saveSpeciality() {
     try {
