@@ -1,154 +1,135 @@
-block_v1 {
-  payload {
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_role {
-              role_name: "uirole"
-              permissions: can_add_asset_qty
-              permissions: can_add_domain_asset_qty
-              permissions: can_create_asset
-              permissions: can_read_assets
-              permissions: can_receive
-              permissions: can_transfer
-              permissions: can_get_my_acc_ast
-              permissions: can_get_my_txs
-              permissions: can_get_all_acc_ast
-              permissions: can_get_all_acc_detail
-            }
-          }
-          created_time: 1556387839629
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_role {
-              role_name: "applicant"
-              permissions: can_receive
-              permissions: can_transfer
-              permissions: can_get_my_acc_ast
-              permissions: can_get_my_txs
-            }
-          }
-          created_time: 1556387839644
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_domain {
-              domain_id: "uidomain"
-              default_role: "uirole"
-            }
-          }
-          created_time: 1556387839644
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_domain {
-              domain_id: "universitySelection"
-              default_role: "applicant"
-            }
-          }
-          created_time: 1556387839645
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_account {
-              account_name: "uiaccount"
-              domain_id: "uidomain"
-              public_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
-            }
-          }
-          created_time: 1556387839645
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "wild"
-              domain_id: "uidomain"
-            }
-          }
-          created_time: 1556387839647
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "csui"
-              domain_id: "uidomain"
-            }
-          }
-          commands {
-            add_asset_quantity {
-              asset_id: "cs#ui"
-              amount: "1"
-            }
-          }
-          created_time: 1556387839649
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            create_asset {
-              asset_name: "wild"
-              domain_id: "universitySelection"
-            }
-          }
-          created_time: 1556387839650
-          quorum: 1
-        }
-      }
-    }
-    transactions {
-      payload {
-        reduced_payload {
-          commands {
-            add_peer {
-              peer {
-                address: "0.0.0.0:10001"
-                peer_key: "FB0503E5FBD1823CD3F5F5384DD2A4F36D9D9A74820AEC70E41AF920ACA9B4A9"
+{
+  "blockV1": {
+    "payload": {
+      "transactions": [{
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "addPeer": {
+                "peer": {
+                  "address": "0.0.0.0:10001",
+                  "peerKey": "4639576646617EB9B5381C54E3181C80AC9EF99C455ACDA6931393D16EF5A268"
+                }
               }
-            }
+            }],
+            "createdTime": "1556463988325",
+            "quorum": 1
           }
-          created_time: 1556387839651
-          quorum: 1
         }
-      }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createRole": {
+                "roleName": "uirole",
+                "permissions": ["can_add_asset_qty", "can_add_domain_asset_qty", "can_create_asset", "can_read_assets", "can_receive", "can_transfer", "can_get_my_acc_ast", "can_get_my_txs", "can_get_all_acc_ast", "can_get_all_acc_detail", "can_create_account"]
+              }
+            }],
+            "createdTime": "1556463988370",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createRole": {
+                "roleName": "applicant",
+                "permissions": ["can_receive", "can_transfer", "can_get_my_acc_ast", "can_get_my_txs"]
+              }
+            }],
+            "createdTime": "1556463988389",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createDomain": {
+                "domainId": "uidomain",
+                "defaultRole": "uirole"
+              }
+            }],
+            "createdTime": "1556463988389",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createDomain": {
+                "domainId": "universitySelection",
+                "defaultRole": "applicant"
+              }
+            }],
+            "createdTime": "1556463988391",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAccount": {
+                "accountName": "ui_account",
+                "domainId": "uidomain",
+                "publicKey": "4639576646617EB9B5381C54E3181C80AC9EF99C455ACDA6931393D16EF5A268"
+              }
+            }],
+            "createdTime": "1556463988392",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "wild",
+                "domainId": "uidomain"
+              }
+            }],
+            "createdTime": "1556463988394",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "csui",
+                "domainId": "uidomain"
+              }
+            }, {
+              "addAssetQuantity": {
+                "assetId": "cs#ui",
+                "amount": "1"
+              }
+            }],
+            "createdTime": "1556463988396",
+            "quorum": 1
+          }
+        }
+      }, {
+        "payload": {
+          "reducedPayload": {
+            "commands": [{
+              "createAsset": {
+                "assetName": "wild",
+                "domainId": "universitySelection"
+              }
+            }],
+            "createdTime": "1556463988397",
+            "quorum": 1
+          }
+        }
+      }],
+      "txNumber": 9,
+      "height": "1",
+      "createdTime": "1556463988398"
     }
-    tx_number: 9
-    height: 1
-    created_time: 1556387839654
   }
 }
