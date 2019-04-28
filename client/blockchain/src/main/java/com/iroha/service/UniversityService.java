@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
-import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
 
 
 public class UniversityService {
@@ -53,7 +52,7 @@ public class UniversityService {
     return api.transaction(transaction).distinct();
   }
 
-  //    public Observable chooseUniversity(ResponseApplicant applicant, KeyPair keyPair)  {
+//    public Observable chooseUniversity(ResponseApplicant applicant, KeyPair keyPair)  {
 //        val removeWildTokenTransaction = createTransactionToUniversity(applicant,WILD_ASSET_NAME, 1, keyPair);
 //        val getSpecialityTokensTransaction = createTransactionFromUniversity(applicant,WILD_SPECIALITY_ASSET_NAME,3);
 //        val transactions = Arrays.asList(removeWildTokenTransaction,getSpecialityTokensTransaction);

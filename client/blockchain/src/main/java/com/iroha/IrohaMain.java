@@ -13,19 +13,27 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import jp.co.soramitsu.iroha.testcontainers.PeerConfig;
 
 public class IrohaMain {
 
   public static void main(String[] args) throws FileNotFoundException {
     Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
-    University university = new University("ui", "ui", Arrays.asList(speciality));
+    University university = new University("ui", "ui", "192.168.0.2", 5134, Arrays.asList(speciality));
 //		IrohaContainer iroha = new IrohaContainer()
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
-    GenesisGenerator.getGenesisBlock(Arrays.asList(university));
+    List<University> universities = Arrays.asList(university);
+    Map<String, KeyPair> universitiesKeys = ChainEntitiesUtils.generateKeys(universities.stream()
+        .map(x -> x.getName())
+        .collect(Collectors.toList()));
+
+    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, universitiesKeys);
     UniversityService service = new UniversityService(
-        ChainEntitiesUtils.universitiesKeys.get(university.getName()),
+        universitiesKeys.get(university.getName()),
         university);
     Applicant applicant = new Applicant( "name", "surname");
     KeyPair applicantKeys = service.createNewApplicantAccount(applicant);
@@ -63,14 +71,14 @@ public class IrohaMain {
     }
   }
 
-  public static PeerConfig getPeerConfig(University university) {
+  public static PeerConfig getPeerConfig(University university, Map<String, KeyPair> universitiesKeys) {
 
     PeerConfig config = PeerConfig.builder()
-        .genesisBlock(GenesisGenerator.getGenesisBlock(Arrays.asList(university)))
+        .genesisBlock(GenesisGenerator.getGenesisBlock(Arrays.asList(university), universitiesKeys))
         .build();
 
     // don't forget to add peer keypair to config
-    config.withPeerKeyPair(ChainEntitiesUtils.universitiesKeys.get(university.getName()));
+    config.withPeerKeyPair(universitiesKeys.get(university.getName()));
     return config;
   }
 

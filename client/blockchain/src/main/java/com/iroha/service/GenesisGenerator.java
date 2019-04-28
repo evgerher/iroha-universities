@@ -16,9 +16,6 @@ import static com.iroha.utils.ChainEntitiesUtils.*;
 
 public class GenesisGenerator {
     public static BlockOuterClass.Block getGenesisBlock(List<University> universities, Map<String, KeyPair> universitiesKeys) {
-        ChainEntitiesUtils.generateKeys(universities.stream()
-            .map(x -> x.getName())
-            .collect(Collectors.toList()));
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
         for (Transaction transaction : getRequiredRoles(universities)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
