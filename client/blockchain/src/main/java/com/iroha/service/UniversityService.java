@@ -49,6 +49,15 @@ public class UniversityService {
     api = IrohaApiSingletone.getIrohaApiInstance();
   }
 
+
+  public KeyPair getUniversityKeyPair() {
+    return universityKeyPair;
+  }
+
+  public University getUniversity() {
+    return university;
+  }
+
   /**
    * Method creates new account and sends him wild tokens
    * @param applicant

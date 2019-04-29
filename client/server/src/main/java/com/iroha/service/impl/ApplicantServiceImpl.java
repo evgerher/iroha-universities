@@ -107,7 +107,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 
   @Override
   public void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect) {
-
+    universityService.selectSpeciality(userCode, applicantSelect);
   }
 
   @Override

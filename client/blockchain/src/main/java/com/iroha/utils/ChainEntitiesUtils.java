@@ -73,4 +73,10 @@ public class ChainEntitiesUtils {
     public static byte[] hexToBytes(String encodedBytes) {
         return DatatypeConverter.parseHexBinary(encodedBytes);
     }
+
+    public static KeyPair getKeys(Applicant applicant) {
+        byte[] bytesPkey = ChainEntitiesUtils.hexToBytes(applicant.getPkey());
+        byte[] bytesPubKey = ChainEntitiesUtils.hexToBytes(applicant.getPubkey());
+        return Ed25519Sha3.keyPairFromBytes(bytesPkey, bytesPubKey);
+    }
 }
