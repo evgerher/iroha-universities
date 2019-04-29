@@ -1,6 +1,8 @@
 package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
+import iroha.protocol.QryResponses.Account;
+import iroha.protocol.Queries;
 import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.List;
@@ -181,19 +183,31 @@ public class UniversityService {
     val balance = api.query(query);
     return balance.getAccountAssetsResponse().getAccountAssetsList();
   }
-    private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity, University university) {
-        String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
-        String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
-        return Transaction.builder(accountId)
-                .transferAsset(accountId,uniId,assetId,"",assetsQuantity.toString())
-                .build();
 
-    }
+  private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity, University university) {
+      String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
+      String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+      return Transaction.builder(accountId)
+              .transferAsset(accountId,uniId,assetId,"",assetsQuantity.toString())
+              .build();
 
-    private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
-        String accountId = getAccountId(getUniversityAccountName(university),getUniversityDomain(university));
-        return Transaction.builder(accountId)
-                .addAssetQuantity(assetId,assetQunatity.toString())
-                .build();
-    }
+  }
+
+  private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
+      String accountId = getAccountId(getUniversityAccountName(university),getUniversityDomain(university));
+      return Transaction.builder(accountId)
+              .addAssetQuantity(assetId,assetQunatity.toString())
+              .build();
+  }
+
+  private Queries.Query constructQueryAccount(String accountId) {
+    String universityAccount = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+    return Query.builder(universityAccount, 1).getAccount(accountId).buildSigned(universityKeyPair);
+  }
+
+
+  public Account getAccount(String txhash) {
+    Queries.Query q = constructQueryAccount(txhash);
+    return api.query(q).getAccountResponse().getAccount();
+  }
 }

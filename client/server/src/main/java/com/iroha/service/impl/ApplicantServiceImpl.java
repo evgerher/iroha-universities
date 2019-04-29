@@ -81,8 +81,13 @@ public class ApplicantServiceImpl implements ApplicantService {
   @Override
   public UserCode getUserCode(String txHash) {
     logger.info("Request usercode mapping for txhash={}", txHash);
-    RegistrationTx registrationTx = mongoConnector.getRegistrationMapping(txHash);
-    return new UserCode(registrationTx.getUserCode());
+    TxHash tx_hash = new TxHash(txHash);
+    if (universityService.getAccountStatus(tx_hash) != null) {
+      RegistrationTx registrationTx = mongoConnector.getRegistrationMapping(txHash);
+      return new UserCode(registrationTx.getPayload());
+    } else {
+      return new UserCode("Account does not exist");
+    }
   }
 
   @Override
@@ -96,7 +101,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 
       return new ApplicantResponse(applicant, assets);
     } catch (NullPointerException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Applicant with provided userCode not found", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Applicant with provided payload not found", e);
     }
   }
 

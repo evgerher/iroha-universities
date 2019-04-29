@@ -2,8 +2,11 @@ package com.iroha.service.impl;
 
 import com.iroha.dao.MongoDBConnector;
 import com.iroha.model.Applicant;
+import com.iroha.model.applicant.TxHash;
+import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.University;
 import com.iroha.service.UniversityService;
+import iroha.protocol.QryResponses.Account;
 import iroha.protocol.QryResponses.AccountAsset;
 import java.security.KeyPair;
 import java.util.List;
@@ -27,5 +30,17 @@ public class UniversityWiredService {
 
   public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
     return universityService.getAllAssertsOfApplicant(applicant);
+  }
+
+  public String getAccountStatus(TxHash txhash) {
+    try {
+      RegistrationTx regTx = mongoConnector.getRegistrationMapping(txhash.getTxhash());
+      String accountId = regTx.getPayload();
+      Account account = universityService.getAccount(accountId);
+      return account.getJsonData();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 }

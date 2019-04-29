@@ -12,7 +12,7 @@ import lombok.Data;
 public class RegistrationTx {
   private static final Gson gson = new GsonBuilder().create();
   private String txHash;
-  private String userCode;
+  private String payload;
 
   @Override
   public String toString() {
