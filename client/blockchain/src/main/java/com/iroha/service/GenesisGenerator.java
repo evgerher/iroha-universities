@@ -97,7 +97,7 @@ public class GenesisGenerator {
             logger.info("Initial funding of domain={}", domain);
 
             transactions.add(Transaction.builder(null)
-                    .createAsset(Consts.WILD_ASSET_NAME, domain, 0)
+                    .createAsset(Consts.WILD_SPECIALITY_ASSET_NAME, domain, 0)
                     .build());
             for (Speciality speciality : university.getSpecialities()) {
                 String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));

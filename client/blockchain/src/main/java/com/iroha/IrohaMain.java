@@ -173,10 +173,24 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
     service.chooseUniversity(applicant,applicantKeys,observer, university, uniKeys.get(university.getName()));
-    sleep(5000);
+    logger.info("Sleep for 10 seconds");
+
+    sleep(10000);
+    logger.info("Sleep finished1");
     assets =service.getAllAssertsOfApplicant(applicant);
       for(QryResponses.AccountAsset asset: assets){
-          System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+          logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
       }
+
+    service.chooseSpeciality(applicant,speciality,observer,applicantKeys, university, uniKeys.get(university.getName()));
+    logger.info("Sleep for 10 seconds");
+
+    sleep(10000);
+    logger.info("Sleep finished2");
+    assets =service.getAllAssertsOfApplicant(applicant);
+    for(QryResponses.AccountAsset asset: assets){
+      logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+    }
+
   }
 }
