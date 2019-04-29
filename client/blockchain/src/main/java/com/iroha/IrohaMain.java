@@ -156,7 +156,7 @@ public class IrohaMain {
     }
 
     logger.info("Sleep for 30 secs");
-    sleep(30000);
+    sleep(15000);
     logger.info("Sleep finished");
     logger.info("Sending wild tokens to applicant={}", applicant);
 
@@ -192,5 +192,14 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
 
+    service.swapUniversity(applicant,university,speciality,kai,applicantKeys, uniKeys.get(kai.getName()), observer);
+    logger.info("Sleep for 10 seconds");
+
+    sleep(20000);
+    logger.info("Sleep finished2");
+    assets =service.getAllAssertsOfApplicant(applicant);
+    for(QryResponses.AccountAsset asset: assets){
+      logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+    }
   }
 }

@@ -2,9 +2,12 @@ package com.iroha.service;
 
 import com.iroha.model.university.Speciality;
 import com.iroha.utils.ChainEntitiesUtils;
+
 import java.security.KeyPair;
-import java.util.Arrays;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import static com.iroha.utils.ChainEntitiesUtils.*;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
+import static io.reactivex.Flowable.zip;
 
 
 public class UniversityService {
@@ -97,8 +101,14 @@ public class UniversityService {
                 createUnsignedTransactionToUniversity(applicant,getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN),1, university).sign(applicantKeyPair).build(),
                 createUnsignedTransactionFromUniversity(applicant,getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),3, university).sign(universityKeyPair).build()
         );
-        api.transactionListSync(transactions);
-        val waiter = new WaitForTerminalStatus();;
+//        api.transactionListSync(createBatch(transactions, TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC));
+        Map<TransactionOuterClass.Transaction,KeyPair> keys = new HashMap<>();
+        keys.put(transactions.get(0),universityKeyPair);
+        keys.put(transactions.get(1),applicantKeyPair);
+        keys.put(transactions.get(2),universityKeyPair);
+        api.transactionListSync(createBatch(transactions, TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC,keys));
+
+        val waiter = new WaitForTerminalStatus();
         for (TransactionOuterClass.Transaction tx : transactions) {
             val hash = Utils.hash(tx);
             waiter.subscribe(api, hash)
@@ -114,7 +124,11 @@ public class UniversityService {
                 createUnsignedTransactionToUniversity(applicant,getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),1, university).sign(applicantKeyPair).build(),
                 createUnsignedTransactionFromUniversity(applicant,getAssetId(assetName,getUniversityDomain(university)),1, university).sign(universityKeyPair).build()
         );
-        api.transactionListSync(transactions);
+        Map<TransactionOuterClass.Transaction,KeyPair> keys = new HashMap<>();
+        keys.put(transactions.get(0),applicantKeyPair);
+        keys.put(transactions.get(1),universityKeyPair);
+
+        api.transactionListSync((createBatch(transactions,TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC, keys)));
         val waiter = new WaitForTerminalStatus();
         for (TransactionOuterClass.Transaction tx : transactions) {
             val hash = Utils.hash(tx);
@@ -123,10 +137,28 @@ public class UniversityService {
         }
     }
 
-//
-//    public boolean swapUniversity(ResponseApplicant applicant, University destinationUniversity, Speciality speciality){
-//
-//    }
+
+    public void  swapUniversity(Applicant applicant, University sourceUniversity,
+                                  Speciality speciality, University destinationUniversity, KeyPair aplicantKey,
+                                   KeyPair destUniKey, Observer observer){
+        String assetNameSource = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(sourceUniversity));
+        String assetNameDest = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(destinationUniversity));
+
+        List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
+                createUnsignedTransactionToUniversity(applicant,getAssetId(assetNameSource,getUniversityDomain(sourceUniversity)),1, sourceUniversity).sign(aplicantKey).build(),
+                createUnsignedTransactionFromUniversity(applicant,getAssetId(assetNameDest,getUniversityDomain(destinationUniversity)),1, destinationUniversity).sign(destUniKey).build()
+        );
+        Map<TransactionOuterClass.Transaction,KeyPair> keys = new HashMap<>();
+        keys.put(transactions.get(0),aplicantKey);
+        keys.put(transactions.get(1),destUniKey);
+        api.transactionListSync((createBatch(transactions,TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC, keys )));
+        val waiter = new WaitForTerminalStatus();
+        for (TransactionOuterClass.Transaction tx : transactions) {
+            val hash = Utils.hash(tx);
+            waiter.subscribe(api, hash)
+                    .subscribe(observer);
+        }
+    }
 //
 //    public boolean swapSpeciality(ResponseApplicant applicant, Speciality sourceSpeciality, Speciality destinationSpecialuty){
 //
@@ -179,7 +211,7 @@ public class UniversityService {
                                                                 String assetId, Integer assetsQuantity, University university) {
         String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
         String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
-        return Transaction.builder(uniId)
+        return Transaction.builder(uniId,Instant.now())
                 .transferAsset(uniId,accountId,assetId,"",assetsQuantity.toString())
                 .build();
     }
@@ -198,8 +230,8 @@ public class UniversityService {
   }
     private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity, University university) {
         String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
-        String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
-        return Transaction.builder(accountId)
+        String uniId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        return Transaction.builder(accountId,Instant.now())
                 .transferAsset(accountId,uniId,assetId,"",assetsQuantity.toString())
                 .build();
 
@@ -207,8 +239,23 @@ public class UniversityService {
 
     private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
         String accountId = getAccountId(getUniversityAccountName(university),getUniversityDomain(university));
-        return Transaction.builder(accountId)
+        return Transaction.builder(accountId,Instant.now())
                 .addAssetQuantity(assetId,assetQunatity.toString())
                 .build();
+    }
+
+    private static Iterable<TransactionOuterClass.Transaction> createBatch(
+            Iterable<TransactionOuterClass.Transaction> list, TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType batchType, Map<TransactionOuterClass.Transaction,KeyPair> keys) {
+        final Iterable<String> batchHashes = Utils.getProtoBatchHashesHex(list);
+
+        return StreamSupport.stream(list.spliterator(), false)
+                .map(tx -> Transaction
+                        .parseFrom(tx)
+                        .makeMutable()
+                        .setBatchMeta(batchType, batchHashes)
+                        .sign(keys.get(tx))
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 }
