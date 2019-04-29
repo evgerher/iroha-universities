@@ -17,7 +17,7 @@ import org.testcontainers.shaded.javax.ws.rs.QueryParam;
 
 @RestController
 @RequestMapping("/applicant")
-public class ApplicantController {
+public class ApplicantController { // todo: expected to be used only after blockchain start
   private static final Logger logger = LoggerFactory.getLogger(ApplicantController.class);
 
   private final ApplicantService applicantService;

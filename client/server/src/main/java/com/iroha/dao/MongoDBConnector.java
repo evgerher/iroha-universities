@@ -41,7 +41,7 @@ public class MongoDBConnector {
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static String APPLICANTS_COLLECTION = "applicants";
   private final static String REGISTRATION_COLLECTION = "registration";
-  private final static String UNIVERSITY_KEYS_COLLECTION = "registration";
+  private final static String UNIVERSITY_KEYS_COLLECTION = "university_keys";
   private final Gson gson = new GsonBuilder().create();
 
   private static void initializeCollections() {

@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface IrohaService {
-  void startBlockchain(List<University> universities);
+  void startBlockchain();
 }
