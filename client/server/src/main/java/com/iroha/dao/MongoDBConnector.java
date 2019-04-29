@@ -1,27 +1,34 @@
 package com.iroha.dao;
 
+import static com.iroha.utils.ChainEntitiesUtils.*;
 import static com.mongodb.client.model.Filters.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.iroha.dao.model.UniversityKeys;
 import com.iroha.model.Applicant;
-import com.iroha.model.university.Speciality;
-import com.iroha.model.university.University;
+import com.iroha.model.applicant.responses.RegistrationTx;
+import com.iroha.model.university.*;
+import com.iroha.utils.ChainEntitiesUtils;
 
 import com.mongodb.Function;
 import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.Indexes;
 
+import java.io.IOException;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-public class MongoDBConnector { // todo: dependency injection
+@Service
+public class MongoDBConnector {
   private static final Logger logger = LoggerFactory.getLogger(MongoDBConnector.class);
   static {
     initializeCollections();
@@ -33,6 +40,8 @@ public class MongoDBConnector { // todo: dependency injection
   private final static String SPECIALITY_COLLECTION = "speciality";
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static String APPLICANTS_COLLECTION = "applicants";
+  private final static String REGISTRATION_COLLECTION = "registration";
+  private final static String UNIVERSITY_KEYS_COLLECTION = "registration";
   private final Gson gson = new GsonBuilder().create();
 
   private static void initializeCollections() {
@@ -40,7 +49,8 @@ public class MongoDBConnector { // todo: dependency injection
       MongoDatabase db = client.getDatabase(database);
       ArrayList<String> collections = db.listCollectionNames().into(new ArrayList<>());
 
-      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION};
+      String[] expected = new String[]{SPECIALITY_COLLECTION, UNIVERSITY_COLLECTION, APPLICANTS_COLLECTION,
+          REGISTRATION_COLLECTION, UNIVERSITY_KEYS_COLLECTION};
 
       for (String collection : expected) {
         if (!collections.contains(collection)) {
@@ -84,9 +94,13 @@ public class MongoDBConnector { // todo: dependency injection
   }
 
   private void insertDoc(String collectionName, Object object) {
+    Document doc = Document.parse(object.toString());
+    insertDoc(collectionName, doc);
+  }
+
+  private void insertDoc(String collectionName, Document doc) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(collectionName);
-      Document doc = Document.parse(object.toString());
       collection.insertOne(doc);
     }
   }
@@ -141,12 +155,72 @@ public class MongoDBConnector { // todo: dependency injection
     insertDoc(APPLICANTS_COLLECTION, applicant);
   }
 
-  public Applicant getApplicant(String pubkey) {
+  public Applicant getApplicant(String usercode) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
-      return collection.find(eq("pubkey", pubkey))
+      return collection.find(eq("userCode", usercode))
           .map(jsonToObject(Applicant.class))
           .first();
+    }
+  }
+
+  public void insertRegistrationMapping(RegistrationTx registration) {
+    insertDoc(REGISTRATION_COLLECTION, Document.parse(registration.toString()));
+  }
+
+  public RegistrationTx getRegistrationMapping(String txHash) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(REGISTRATION_COLLECTION);
+      Document doc = collection.findOneAndDelete(eq("txHash", txHash));
+      return jsonToObject(doc.toJson(), RegistrationTx.class);
+    } catch (Exception e) {
+      logger.error("Not found by tx={}, error={}", txHash, e);
+      throw e;
+    }
+  }
+
+  private <T> T jsonToObject(String json, Class<T> targetClass) {
+    return gson.fromJson(json, targetClass);
+  }
+
+  public void insertUniversityKeys(University uni, KeyPair keys) {
+    try {
+      String encodedKeys = encodeKeyPair(keys);
+      Document doc = new Document();
+      doc.append("university", uni.getName());
+      doc.append("keypair", encodedKeys);
+
+      insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
+    } catch (IOException e) {
+      logger.error("Unable to encode keypair");
+    }
+  }
+
+  public KeyPair getUniversityKeys(String name) {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
+      return collection.find(eq("university", name))
+          .map(pair -> {
+            String encodedKeyPair = (String) pair.get("keypair");
+            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
+            return decodeKeyPair(bytes);
+          })
+          .first();
+    }
+  }
+
+  public List<UniversityKeys> getUniversityKeys() {
+    try (MongoClient client = getClient()) {
+      MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
+      return collection.find()
+          .map(pair -> {
+            String name = (String) pair.get("university");
+            String encodedKeyPair = (String) pair.get("keypair");
+            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
+            KeyPair keys = decodeKeyPair(bytes);
+
+            return new UniversityKeys(name, keys);
+          }).into(new ArrayList<>());
     }
   }
 }

@@ -1,14 +1,19 @@
 package com.iroha.service;
 
-import com.iroha.model.applicant.ResponseApplicant;
-import com.iroha.model.applicant.ApplicantExchangeSpeciality;
-import com.iroha.model.applicant.ApplicantSelectSpeciality;
+import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.responses.ApplicantResponse;
+import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
+import com.iroha.model.applicant.requests.SelectSpecialityRequest;
+import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.UserCode;
 
 public interface ApplicantService {
-  UserCode registerApplicant(String name);
-  ResponseApplicant getApplicant(UserCode userCode);
+  TxHash registerApplicant(ApplicantRegisterRequest request);
 
-  void selectSpeciality(String userCode, ApplicantSelectSpeciality applicantSelect);
-  void exchangeSpecialities(String userCode, ApplicantExchangeSpeciality applicantExchange);
+  UserCode getUserCode(String txHash);
+
+  ApplicantResponse getApplicant(UserCode userCode);
+
+  void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect);
+  void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange);
 }

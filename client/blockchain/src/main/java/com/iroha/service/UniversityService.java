@@ -1,6 +1,9 @@
 package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
+import io.reactivex.Observer;
+import iroha.protocol.QryResponses;
+import iroha.protocol.QryResponses.AccountAsset;
 import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.List;
@@ -13,9 +16,11 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import iroha.protocol.QryResponses;
 import iroha.protocol.TransactionOuterClass;
+import java.util.List;
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
 import jp.co.soramitsu.iroha.java.Transaction;
+import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +51,7 @@ public class UniversityService {
    * @param observer
    * @return trasaction .createAccount hash (probably)
    */
-  public String createNewApplicantAccount(Applicant applicant, KeyPair keys, Observer observer) {
+  public String createNewApplicantAccount(Applicant applicant, KeyPair keys, InlineTransactionStatusObserver observer) {
     val applicantAccountName = ChainEntitiesUtils.getApplicantAccountName(applicant);
     val domain = ChainEntitiesUtils.getUniversityDomain(university);
     val accountName = getUniversityAccountName(university);

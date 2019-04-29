@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.*;
+import java.util.stream.Collectors;
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
 import org.slf4j.Logger;
@@ -170,12 +171,12 @@ public class GenesisGenerator {
         return transactions;
     }
 
-    private static List<Transaction> getAccounts(List<University> universities) {
+    private static List<Transaction> getAccounts(List<University> universities, Map<String, KeyPair> universitiesKeys) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
             transactions.add(Transaction.builder(null)
                     .createAccount(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
-                        .getUniversityDomain(university), ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic())
+                        .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;

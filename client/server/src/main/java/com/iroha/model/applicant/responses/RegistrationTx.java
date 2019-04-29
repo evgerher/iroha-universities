@@ -1,4 +1,4 @@
-package com.iroha.model.applicant;
+package com.iroha.model.applicant.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
@@ -9,10 +9,10 @@ import lombok.Data;
 @JsonInclude
 @Data
 @AllArgsConstructor
-public class ApplicantSelectSpeciality {
+public class RegistrationTx {
   private static final Gson gson = new GsonBuilder().create();
-  private final String code;
-  private final String university;
+  private String txHash;
+  private String userCode;
 
   @Override
   public String toString() {
