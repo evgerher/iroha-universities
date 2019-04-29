@@ -9,6 +9,7 @@ import iroha.protocol.BlockOuterClass;
 
 import java.io.File;
 import java.security.KeyPair;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +32,9 @@ public class IrohaServiceImpl implements IrohaService {
   private BlockOuterClass.Block createGenesisBlock(Map<String, KeyPair> keys) {
     List<University> universities = mongoConnector.getUniversities();
     List<Speciality> specialities = mongoConnector.getSpecialities();
+    for (University uni: universities)
+      uni.setSpecialities(new LinkedList<>());
+
     Map<String, List<Speciality>> specsMap = universities.stream().collect(Collectors.toMap(
        University::getName,
        University::getSpecialities
@@ -60,9 +64,9 @@ public class IrohaServiceImpl implements IrohaService {
           "../docker/genesis-kfu/genesis.block"
       });
 
-      GenesisGenerator.saveKey(uniKeyPairs.get("KAI"), "../docker/genesis-kai");
-      GenesisGenerator.saveKey(uniKeyPairs.get("KFU"), "../docker/genesis-kfu");
-      GenesisGenerator.saveKey(uniKeyPairs.get("UI"), "../docker/genesis-ui");
+      GenesisGenerator.saveKey(uniKeyPairs.get("kai"), "../docker/genesis-kai");
+      GenesisGenerator.saveKey(uniKeyPairs.get("kfu"), "../docker/genesis-kfu");
+      GenesisGenerator.saveKey(uniKeyPairs.get("ui"), "../docker/genesis-ui");
 //    GenesisGenerator.saveKey(uniKeyPairs.get("SPIBI"), "../docker/genesis-spibi/");
 
       File dir = new File("../docker");

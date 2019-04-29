@@ -49,7 +49,7 @@ public class GenesisGenerator {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
 
-        logger.info("Add domains for each university");
+        logger.info("Add accounts for each university");
         for (Transaction transaction : getAccounts(universities, keys)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }

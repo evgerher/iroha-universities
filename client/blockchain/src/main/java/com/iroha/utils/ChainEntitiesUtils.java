@@ -2,6 +2,7 @@ package com.iroha.utils;
 
 import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
+import javax.xml.bind.DatatypeConverter;
 import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
 
 import java.security.KeyPair;
@@ -69,7 +70,7 @@ public class ChainEntitiesUtils {
         return sb.toString();
     }
     
-    public static byte[] hexToBytes(String encodedKeyPair) {
-        return encodedKeyPair.getBytes();
+    public static byte[] hexToBytes(String encodedBytes) {
+        return DatatypeConverter.parseHexBinary(encodedBytes);
     }
 }
