@@ -38,7 +38,7 @@ public class ApplicantServiceImpl implements ApplicantService {
   private final MongoDBConnector mongoConnector;
 
   @Autowired
-  public ApplicantServiceImpl(@Qualifier("KAI") UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
+  public ApplicantServiceImpl(@Qualifier("kai") UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
     this.universityService = universityService;
     this.mongoConnector = mongoConnector;
   }

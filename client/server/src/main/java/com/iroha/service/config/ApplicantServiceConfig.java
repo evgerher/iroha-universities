@@ -16,9 +16,9 @@ public class ApplicantServiceConfig {
   private MongoDBConnector mongoconnector;
 
   @Bean
-  @ConditionalOnProperty(name = "university.name", havingValue = "KAI", matchIfMissing = true)
+  @ConditionalOnProperty(name = "university.name", havingValue = "kai", matchIfMissing = true)
   public ApplicantService getApplicantService() {
-    UniversityWiredService universityService = new UniversityWiredService("KAI", mongoconnector);
+    UniversityWiredService universityService = new UniversityWiredService("kai", mongoconnector);
     return new ApplicantServiceImpl(universityService, mongoconnector);
   }
 }

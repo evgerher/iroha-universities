@@ -13,30 +13,30 @@ public class UniversityWiredServiceConfig {
   private MongoDBConnector mongoConnector;
 
   @Bean
-  @Qualifier("KAI")
-  @ConditionalOnProperty(name = "university.name", havingValue = "KAI", matchIfMissing = true)
+  @Qualifier("kai")
+  @ConditionalOnProperty(name = "university.name", havingValue = "kai", matchIfMissing = true)
   public UniversityWiredService createUniversityServiceKAI() {
-    return new UniversityWiredService("KAI", mongoConnector);
+    return new UniversityWiredService("kai", mongoConnector);
   }
 
   @Bean
-  @Qualifier("UI")
-  @ConditionalOnProperty(name = "university.name", havingValue = "UI", matchIfMissing = true)
+  @Qualifier("ui")
+  @ConditionalOnProperty(name = "university.name", havingValue = "ui", matchIfMissing = true)
   public UniversityWiredService createUniversityServiceUI() {
-    return new UniversityWiredService("UI", mongoConnector);
+    return new UniversityWiredService("ui", mongoConnector);
   }
 
   @Bean
-  @Qualifier("KFU")
-  @ConditionalOnProperty(name = "university.name", havingValue = "KFU", matchIfMissing = true)
+  @Qualifier("kfu")
+  @ConditionalOnProperty(name = "university.name", havingValue = "kfu", matchIfMissing = true)
   public UniversityWiredService createUniversityServiceKFU() {
-    return new UniversityWiredService("KFU", mongoConnector);
+    return new UniversityWiredService("kfu", mongoConnector);
   }
 
   @Bean
-  @Qualifier("SPIBI")
-  @ConditionalOnProperty(name = "university.name", havingValue = "SPIBI", matchIfMissing = true)
+  @Qualifier("spibi")
+  @ConditionalOnProperty(name = "university.name", havingValue = "spibi", matchIfMissing = true)
   public UniversityWiredService createUniversityServiceSPIBI() {
-    return new UniversityWiredService("SPIBI", mongoConnector);
+    return new UniversityWiredService("spibi", mongoConnector);
   }
 }
