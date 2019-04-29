@@ -29,9 +29,16 @@ public class IrohaServiceImpl implements IrohaService {
     this.mongoConnector = mongoConnector;
   }
 
+  /**
+   * Method creates genesis block from universities in the mongodb (created during initialization process)
+   * @param keys - map of university name -> university KeyPair
+   * @return genesis block
+   */
   private BlockOuterClass.Block createGenesisBlock(Map<String, KeyPair> keys) {
     List<University> universities = mongoConnector.getUniversities();
     List<Speciality> specialities = mongoConnector.getSpecialities();
+
+    // Make sure to initialize specialities
     for (University uni: universities)
       uni.setSpecialities(new LinkedList<>());
 
@@ -47,6 +54,9 @@ public class IrohaServiceImpl implements IrohaService {
     return GenesisGenerator.getGenesisBlock(universities, keys);
   }
 
+  /**
+   * Initialize blockchain with `docker-compose up` in `docker/` folder
+   */
   @Override
   public void startBlockchain() {
     try {
@@ -64,6 +74,7 @@ public class IrohaServiceImpl implements IrohaService {
           "../docker/genesis-kfu/genesis.block"
       });
 
+      // KeyPairs (node.pub, node.priv)
       GenesisGenerator.saveKey(uniKeyPairs.get("kai"), "../docker/genesis-kai");
       GenesisGenerator.saveKey(uniKeyPairs.get("kfu"), "../docker/genesis-kfu");
       GenesisGenerator.saveKey(uniKeyPairs.get("ui"), "../docker/genesis-ui");

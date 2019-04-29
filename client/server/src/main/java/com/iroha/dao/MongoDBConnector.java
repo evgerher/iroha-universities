@@ -47,6 +47,10 @@ public class MongoDBConnector {
   private final static String UNIVERSITY_KEYS_COLLECTION = "university_keys";
   private final Gson gson = new GsonBuilder().create();
 
+  /**
+   * Method makes sure all collections do exist
+   * If collection does not exist - creates it
+   */
   private static void initializeCollections() {
     try (MongoClient client = new MongoClient(mongoHost , mongoPort)) {
       MongoDatabase db = client.getDatabase(database);
@@ -108,6 +112,11 @@ public class MongoDBConnector {
     }
   }
 
+  /**
+   * Return university from mongodb by name
+   * @param uniName
+   * @return
+   */
   public University getUniversity(String uniName) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_COLLECTION);
@@ -121,6 +130,13 @@ public class MongoDBConnector {
     return param != null && !param.isEmpty();
   }
 
+  /**
+   * Method returns specialities from collection by provided code and/or university
+   * Both parameters are nullable
+   * @param code of the speciality
+   * @param university name
+   * @return list of specialities fltered
+   */
   public List<Speciality> getSpecialities(String code, String university) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(SPECIALITY_COLLECTION);
@@ -171,6 +187,12 @@ public class MongoDBConnector {
     insertDoc(REGISTRATION_COLLECTION, Document.parse(registration.toString()));
   }
 
+  /**
+   * Currently not used method
+   * @param txHash
+   * @return
+   */
+  @Deprecated
   public RegistrationTx getRegistrationMapping(String txHash) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(REGISTRATION_COLLECTION);
@@ -186,6 +208,11 @@ public class MongoDBConnector {
     return gson.fromJson(json, targetClass);
   }
 
+  /**
+   * Insert university' key into mongo
+   * @param uni
+   * @param keys
+   */
   public void insertUniversityKeys(University uni, KeyPair keys) {
     String encodedPKey = ChainEntitiesUtils.bytesToHex(keys.getPrivate().getEncoded());
     String encodedPubKey = ChainEntitiesUtils.bytesToHex(keys.getPublic().getEncoded());
@@ -197,6 +224,11 @@ public class MongoDBConnector {
     insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
   }
 
+  /**
+   * Method returns university key by name
+   * @param name
+   * @return
+   */
   public KeyPair getUniversityKeys(String name) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
@@ -212,6 +244,10 @@ public class MongoDBConnector {
     }
   }
 
+  /**
+   * Return all University+Key objects from mongodb
+   * @return
+   */
   public List<UniversityKeys> getUniversityKeys() {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);

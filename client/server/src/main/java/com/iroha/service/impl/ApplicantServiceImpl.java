@@ -71,14 +71,21 @@ public class ApplicantServiceImpl implements ApplicantService {
                   applicant.getUserCode()));
         })
         .onComplete(() -> {
-          logger.info("Transaction completed");
+          logger.info("Register applicant completed");
         })
         .build();
 
     return new UserCode(universityService.createNewApplicantAccount(applicant, keys, obs));
   }
 
+  /**
+   * Method returns user code if such mapping exists (txhash -> usercode)
+   * Currently not used
+   * @param txHash
+   * @return
+   */
   @Override
+  @Deprecated
   public UserCode getUserCode(String txHash) {
     logger.info("Request usercode mapping for txhash={}", txHash);
     TxHash tx_hash = new TxHash(txHash);
@@ -90,6 +97,11 @@ public class ApplicantServiceImpl implements ApplicantService {
     }
   }
 
+  /**
+   * Retrieve applicant and its assets
+   * @param userCode
+   * @return
+   */
   @Override
   public ApplicantResponse getApplicant(UserCode userCode) {
     try {
@@ -112,9 +124,14 @@ public class ApplicantServiceImpl implements ApplicantService {
 
   @Override
   public void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange) {
-
+    // todo: connect to dilshat's code
   }
 
+  /**
+   * Convert internal iroha AccountAsset into user-friendly Asset
+   * @param irohaAsset
+   * @return
+   */
   private Asset convertAsset(AccountAsset irohaAsset) {
     String[] strings = irohaAsset.getAssetId().split("#");
     String name = strings[0];

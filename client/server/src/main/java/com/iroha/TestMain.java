@@ -2,24 +2,24 @@ package com.iroha;
 
 import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
-import static com.iroha.utils.ChainEntitiesUtils.getAssetId;
 
 import com.iroha.dao.MongoDBConnector;
-import com.iroha.model.Applicant;
 import com.iroha.model.university.University;
 import com.iroha.utils.ChainEntitiesUtils;
 import com.iroha.utils.IrohaApiSingletone;
 import iroha.protocol.TransactionOuterClass;
-import iroha.protocol.TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType;
+
 import java.security.KeyPair;
 import java.time.Instant;
 import java.util.Arrays;
+
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import jp.co.soramitsu.iroha.java.Utils;
 import jp.co.soramitsu.iroha.java.subscription.WaitForTerminalStatus;
+
 import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +78,14 @@ public class TestMain {
 
 //    TransactionOuterClass.Transaction tr2 = Transaction.builder(accountId)
 //        .setBatchMeta(BatchType.ATOMIC, Arrays.asList(t1.getReducedHashHex(), t2.getReducedHashHex()))
-//        .createAsset(ChainEntitiesUtils.getAssetName("dzhigurda", ChainEntitiesUtils.getUniversityDomain(uni)), ChainEntitiesUtils.getUniversityDomain(uni), 0)
-//        .createAsset(ChainEntitiesUtils.getAssetName("huinya", ChainEntitiesUtils.getUniversityDomain(uni)), ChainEntitiesUtils.getUniversityDomain(uni), 0)
+//        .createAsset(ChainEntitiesUtils.getAssetName("asset", ChainEntitiesUtils.getUniversityDomain(uni)), ChainEntitiesUtils.getUniversityDomain(uni), 0)
+//        .createAsset(ChainEntitiesUtils.getAssetName("tesseract", ChainEntitiesUtils.getUniversityDomain(uni)), ChainEntitiesUtils.getUniversityDomain(uni), 0)
 //        .sign(uni.getPeerKey())
 //        .build();
 
 
 //    val  tx = Transaction.builder(accountId)
-//        .addAssetQuantity(ChainEntitiesUtils.getAssetId("huinya", ChainEntitiesUtils.getUniversityDomain(uni)), "10")
+//        .addAssetQuantity(ChainEntitiesUtils.getAssetId("tesseract", ChainEntitiesUtils.getUniversityDomain(uni)), "10")
 //        .sign(uni.getPeerKey())
 //        .build();
     val q = Query.builder(accountId, 1)
