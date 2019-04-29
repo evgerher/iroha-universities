@@ -7,8 +7,11 @@ import com.iroha.model.university.University;
 import com.iroha.service.GenesisGenerator;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
+import com.iroha.utils.IrohaApiSingletone;
 import iroha.protocol.BlockOuterClass;
 
+import iroha.protocol.TransactionOuterClass;
+import iroha.protocol.TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -18,6 +21,8 @@ import java.util.List;
 import iroha.protocol.QryResponses;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jp.co.soramitsu.iroha.java.IrohaAPI;
+import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import lombok.val;
 
