@@ -22,15 +22,15 @@ networks:
       config:
         - subnet: 173.17.2.0/24
 
+  net_kfu:
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 173.17.3.0/24
+
 
   # net_tisbi:
-  #   driver: bridge
-  #   ipam:
-  #     driver: default
-  #     config:
-  #       - subnet: 173.17.3.0/24
-
-  # net_kfu:
   #   driver: bridge
   #   ipam:
   #     driver: default
@@ -94,7 +94,7 @@ services:
 
     volumes:
       - ./genesis-ui:/opt/iroha
-      - ccache-data_kai:/tmp/ccache
+      - ccache-data_ui:/tmp/ccache
     working_dir: /opt/iroha
     networks:
       net_ui:
@@ -111,5 +111,42 @@ services:
       net_ui:
         ipv4_address: 173.17.2.11
 
+  kfu:
+      image: hyperledger/iroha
+      ports:
+        - "50053:50053"
+        - "10003:10003"
+      depends_on:
+        - postgres_kfu
+      tty: true
+      environment:
+        - IROHA_POSTGRES_HOST=173.17.3.11
+        - IROHA_POSTGRES_PORT=5432
+        - IROHA_POSTGRES_USER=iroha
+        - IROHA_POSTGRES_PASSWORD=helloworld
+        - CCACHE_DIR=/tmp/ccache
+        - KEY=node
+
+      volumes:
+        - ./genesis-kfu:/opt/iroha
+        - ccache-data_kfu:/tmp/ccache
+      working_dir: /opt/iroha
+      networks:
+        net_kfu:
+          ipv4_address: 173.17.3.10
+        default:
+          ipv4_address: 192.168.0.4
+
+  postgres_kfu:
+      image: postgres:9.5
+      environment:
+        - POSTGRES_USER=iroha
+        - IROHA_POSTGRES_PASSWORD=helloworld
+      networks:
+        net_kfu:
+          ipv4_address: 173.17.3.11
+
 volumes:
   ccache-data_kai:
+  ccache-data_kfu:
+  ccache-data_ui:
