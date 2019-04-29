@@ -18,6 +18,7 @@ import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.awt.SunHints.Key;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
 
@@ -25,17 +26,16 @@ public class GenesisGenerator {
     private static final Logger logger = LoggerFactory.getLogger(GenesisGenerator.class);
 
 
-    public static BlockOuterClass.Block getGenesisBlock(List<University> universities) {
+    public static BlockOuterClass.Block getGenesisBlock(List<University> universities, Map<String, KeyPair> keys) {
         logger.info("Generate genesis block for universities, amount={}", universities.size());
 
-        ChainEntitiesUtils.generateKeys(universities);
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
         for( University university: universities) {
-            logger.info("Add peer={}, pubkey={}", university.getUri(),
-                ChainEntitiesUtils.bytesToHex(university.getPeerKey().getPublic().getEncoded()));
+            KeyPair uniKeys = keys.get(university.getName());
+            logger.info("Add peer={}, pubkey={}", university.getUri(), ChainEntitiesUtils.bytesToHex(uniKeys.getPublic().getEncoded()));
 
             genesisbuilder = genesisbuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
-                    .addPeer(university.getUri(), university.getPeerKey().getPublic())
+                    .addPeer(university.getUri(), keys.get(university.getName()).getPublic())
                     .build().build());
         }
 
@@ -50,7 +50,7 @@ public class GenesisGenerator {
         }
 
         logger.info("Add domains for each university");
-        for (Transaction transaction : getAccounts(universities)) {
+        for (Transaction transaction : getAccounts(universities, keys)) {
             genesisbuilder = genesisbuilder.addTransaction(transaction.build());
         }
 

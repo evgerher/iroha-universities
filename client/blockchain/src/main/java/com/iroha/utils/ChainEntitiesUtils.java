@@ -19,6 +19,13 @@ import org.slf4j.LoggerFactory;
 public class ChainEntitiesUtils {
     private static final Logger logger = LoggerFactory.getLogger(ChainEntitiesUtils.class);
 
+    public final static class Consts {
+        public static final String UNIVERSITIES_DOMAIN = "universitySelection";
+        public static final String APPLICANT_ROLE = "applicant";
+        public static final String WILD_ASSET_NAME = "wild";
+        public static final String WILD_SPECIALITY_ASSET_NAME = "wild_speciality";
+    }
+
     public static String getAssetName(String specialityName,String universityName){
         return String.format("%s%s",specialityName, universityName);
     }
@@ -53,10 +60,12 @@ public class ChainEntitiesUtils {
     public static String getApplicantAccountName(Applicant applicant){
         return applicant.getId();
     }
+
     public static KeyPair generateKey(){
         Ed25519Sha3 crypto = new Ed25519Sha3();
         return crypto.generateKeypair();
     }
+
     public static String bytesToHex(byte[] hashInBytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : hashInBytes) {
@@ -67,23 +76,6 @@ public class ChainEntitiesUtils {
     
     public static byte[] hexToBytes(String encodedKeyPair) {
         return encodedKeyPair.getBytes();
-    }
-
-    public final static class Consts{
-        public static final String UNIVERSITIES_DOMAIN = "universitySelection";
-        public static final String APPLICANT_ROLE = "applicant";
-        public static final String WILD_ASSET_NAME = "wild";
-        public static final String WILD_SPECIALITY_ASSET_NAME = "wild_speciality";
-
-
-    }
-
-    public static String bytesToHex(byte[] hashInBytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashInBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 
     public static String encodeKeyPair(KeyPair keys) throws IOException {

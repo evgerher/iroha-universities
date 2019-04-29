@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import iroha.protocol.QryResponses;
+import java.util.Map;
+import java.util.stream.Collectors;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import lombok.val;
 
@@ -35,25 +37,38 @@ public class IrohaMain {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
-    University university = new University("ui", "ui", Arrays.asList(speciality));
-    University kai = new University("kai", "kai", Arrays.asList(speciality));
-    University kfu = new University("kfu", "kfu", Arrays.asList(speciality));
-    kai.setPeerKey(ChainEntitiesUtils.generateKey());
-    university.setUri("192.168.0.3:10002");
-    kai.setUri("192.168.0.2:10001");
-    kfu.setUri("192.168.0.4:10003");
-    kfu.setPeerKey(ChainEntitiesUtils.generateKey());
-    university.setPeerKey(ChainEntitiesUtils.generateKey());
-    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
+    List<Speciality> specialities = Arrays.asList(speciality);
+
+    University university = new University("ui", "ui", "192.168.0.3:10002");
+    University kai = new University("kai", "kai", "192.168.0.2:10001");
+    University kfu = new University("kfu", "kfu", "192.168.0.4:10003");
+
+    List<University> universities = Arrays.asList(university,kai,kfu);
+    Map<String, KeyPair> uniKeys = ChainEntitiesUtils.generateKeys(
+        universities.stream()
+        .map(t -> t.getName())
+        .collect(Collectors.toList())
+    );
+
+    university.setSpecialities(specialities);
+    kai.setSpecialities(specialities);
+    kfu.setSpecialities(specialities);
+
+    kai.setPeerKey(uniKeys.get("kai"));
+    kfu.setPeerKey(uniKeys.get("kfu"));
+    university.setPeerKey(uniKeys.get("ui"));
+
 //		IrohaContainer iroha = new IrohaContainer()
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
-    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(Arrays.asList(university,kai,kfu));
+    BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, uniKeys);
     writeGenesisToFiles(genesis, new String[]{
         "./docker/genesis-kai/genesis.block",
         "./docker/genesis-ui/genesis.block",
-        "./docker/genesis-kfu/genesis.block"});
+        "./docker/genesis-kfu/genesis.block"
+    });
 
+    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
     saveKey(university.getPeerKey(),"./docker/genesis-ui");
     saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
 
@@ -65,9 +80,9 @@ public class IrohaMain {
     logger.info("sleep finished");
 
     UniversityService service = new UniversityService(
-        ChainEntitiesUtils.universitiesKeys.get(university.getName()),
+        uniKeys.get(university.getName()),
         university);
-    String pubkey = ChainEntitiesUtils.bytesToHex(ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic().getEncoded());
+    String pubkey = ChainEntitiesUtils.bytesToHex(uniKeys.get(university.getName()).getPublic().getEncoded());
     logger.info("University pubkey={}", pubkey);
 
     val observer =TransactionStatusObserver.builder()
