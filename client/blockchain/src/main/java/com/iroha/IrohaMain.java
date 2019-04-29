@@ -7,8 +7,11 @@ import com.iroha.model.university.University;
 import com.iroha.service.GenesisGenerator;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
+import com.iroha.utils.IrohaApiSingletone;
 import iroha.protocol.BlockOuterClass;
 
+import iroha.protocol.TransactionOuterClass;
+import iroha.protocol.TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -18,6 +21,8 @@ import java.util.List;
 import iroha.protocol.QryResponses;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jp.co.soramitsu.iroha.java.IrohaAPI;
+import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import lombok.val;
 
@@ -60,18 +65,18 @@ public class IrohaMain {
 //		iroha.start();
     BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, uniKeys);
     writeGenesisToFiles(genesis, new String[]{
-        "../docker/genesis-kai/genesis.block",
-        "../docker/genesis-ui/genesis.block",
-        "../docker/genesis-kfu/genesis.block"
+        "./docker/genesis-kai/genesis.block",
+        "./docker/genesis-ui/genesis.block",
+        "./docker/genesis-kfu/genesis.block"
     });
 
-    saveKey(kai.getPeerKey(),"../docker/genesis-kai");
-    saveKey(university.getPeerKey(),"../docker/genesis-ui");
-    saveKey(kfu.getPeerKey(),"../docker/genesis-kfu");
+    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
+    saveKey(university.getPeerKey(),"./docker/genesis-ui");
+    saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
 
     logger.info("Genesis and keys are generated and stored");
 
-    File dir = new File("../docker");
+    File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
     logger.info("Sleep for 30 seconds");
     sleep(30000);
@@ -156,7 +161,7 @@ public class IrohaMain {
     }
 
     logger.info("Sleep for 30 secs");
-    sleep(30000);
+    sleep(15000);
     logger.info("Sleep finished");
     logger.info("Sending wild tokens to applicant={}", applicant);
 
@@ -173,9 +178,33 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
     service.chooseUniversity(applicant,applicantKeys,observer, university, uniKeys.get(university.getName()));
+    logger.info("Sleep for 10 seconds");
+
+    sleep(10000);
+    logger.info("Sleep finished1");
     assets =service.getAllAssertsOfApplicant(applicant);
       for(QryResponses.AccountAsset asset: assets){
-          System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+          logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
       }
+
+    service.chooseSpeciality(applicant,speciality,observer,applicantKeys, university, uniKeys.get(university.getName()));
+    logger.info("Sleep for 10 seconds");
+
+    sleep(10000);
+    logger.info("Sleep finished2");
+    assets =service.getAllAssertsOfApplicant(applicant);
+    for(QryResponses.AccountAsset asset: assets){
+      logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+    }
+
+    service.swapUniversity(applicant,university,speciality,kai,applicantKeys, uniKeys.get(kai.getName()), observer);
+    logger.info("Sleep for 10 seconds");
+
+    sleep(20000);
+    logger.info("Sleep finished2");
+    assets =service.getAllAssertsOfApplicant(applicant);
+    for(QryResponses.AccountAsset asset: assets){
+      logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+    }
   }
 }

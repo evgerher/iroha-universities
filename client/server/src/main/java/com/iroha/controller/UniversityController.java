@@ -27,7 +27,7 @@ public class UniversityController {
   @ResponseStatus(HttpStatus.OK)
   public void saveUniversity(@RequestBody University university) {
     university.validate();
-    logger.info(university.toString());
+    logger.info("Save university={}", university.toString());
     KeyPair keys = ChainEntitiesUtils.generateKey();
     mongoConnector.insertUniversity(university);
     mongoConnector.insertUniversityKeys(university, keys);

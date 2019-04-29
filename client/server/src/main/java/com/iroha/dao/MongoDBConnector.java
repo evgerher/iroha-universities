@@ -20,6 +20,9 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.co.soramitsu.crypto.ed25519.Ed25519Sha3;
+import jp.co.soramitsu.crypto.ed25519.EdDSAPrivateKey;
+import jp.co.soramitsu.crypto.ed25519.EdDSAPublicKey;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -41,7 +44,7 @@ public class MongoDBConnector {
   private final static String UNIVERSITY_COLLECTION = "universities";
   private final static String APPLICANTS_COLLECTION = "applicants";
   private final static String REGISTRATION_COLLECTION = "registration";
-  private final static String UNIVERSITY_KEYS_COLLECTION = "registration";
+  private final static String UNIVERSITY_KEYS_COLLECTION = "university_keys";
   private final Gson gson = new GsonBuilder().create();
 
   private static void initializeCollections() {
@@ -184,16 +187,14 @@ public class MongoDBConnector {
   }
 
   public void insertUniversityKeys(University uni, KeyPair keys) {
-    try {
-      String encodedKeys = encodeKeyPair(keys);
-      Document doc = new Document();
-      doc.append("university", uni.getName());
-      doc.append("keypair", encodedKeys);
+    String encodedPKey = ChainEntitiesUtils.bytesToHex(keys.getPrivate().getEncoded());
+    String encodedPubKey = ChainEntitiesUtils.bytesToHex(keys.getPublic().getEncoded());
+    Document doc = new Document();
+    doc.append("university", uni.getName());
+    doc.append("pkey", encodedPKey);
+    doc.append("pubkey", encodedPubKey);
 
-      insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
-    } catch (IOException e) {
-      logger.error("Unable to encode keypair");
-    }
+    insertDoc(UNIVERSITY_KEYS_COLLECTION, doc);
   }
 
   public KeyPair getUniversityKeys(String name) {
@@ -201,9 +202,11 @@ public class MongoDBConnector {
       MongoCollection<Document> collection = getDB(client).getCollection(UNIVERSITY_KEYS_COLLECTION);
       return collection.find(eq("university", name))
           .map(pair -> {
-            String encodedKeyPair = (String) pair.get("keypair");
-            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
-            return decodeKeyPair(bytes);
+            String encodedPKey = (String) pair.get("pkey");
+            String encodedPubKey = (String) pair.get("pubkey");
+            byte[] bytesPkey = ChainEntitiesUtils.hexToBytes(encodedPKey);
+            byte[] bytesPubKey = ChainEntitiesUtils.hexToBytes(encodedPubKey);
+            return Ed25519Sha3.keyPairFromBytes(bytesPkey, bytesPubKey);
           })
           .first();
     }
@@ -215,9 +218,11 @@ public class MongoDBConnector {
       return collection.find()
           .map(pair -> {
             String name = (String) pair.get("university");
-            String encodedKeyPair = (String) pair.get("keypair");
-            byte[] bytes = ChainEntitiesUtils.hexToBytes(encodedKeyPair);
-            KeyPair keys = decodeKeyPair(bytes);
+            String encodedPKey = (String) pair.get("pkey");
+            String encodedPubKey = (String) pair.get("pubkey");
+            byte[] bytesPkey = ChainEntitiesUtils.hexToBytes(encodedPKey);
+            byte[] bytesPubKey = ChainEntitiesUtils.hexToBytes(encodedPubKey);
+            KeyPair keys = Ed25519Sha3.keyPairFromBytes(bytesPkey, bytesPubKey);
 
             return new UniversityKeys(name, keys);
           }).into(new ArrayList<>());

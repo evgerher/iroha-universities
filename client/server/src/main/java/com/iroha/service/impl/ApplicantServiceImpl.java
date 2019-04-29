@@ -38,7 +38,7 @@ public class ApplicantServiceImpl implements ApplicantService {
   private final MongoDBConnector mongoConnector;
 
   @Autowired
-  public ApplicantServiceImpl(@Qualifier("KAI") UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
+  public ApplicantServiceImpl(@Qualifier("kai") UniversityWiredService universityService, @Qualifier("createConnector") MongoDBConnector mongoConnector) {
     this.universityService = universityService;
     this.mongoConnector = mongoConnector;
   }
@@ -49,7 +49,7 @@ public class ApplicantServiceImpl implements ApplicantService {
    * @return
    */
   @Override
-  public TxHash registerApplicant(ApplicantRegisterRequest request) {
+  public UserCode registerApplicant(ApplicantRegisterRequest request) {
     Applicant applicant = new Applicant(request.getName(), request.getSurname());
 
     // Generate keys
@@ -75,14 +75,19 @@ public class ApplicantServiceImpl implements ApplicantService {
         })
         .build();
 
-    return new TxHash(universityService.createNewApplicantAccount(applicant, keys, obs));
+    return new UserCode(universityService.createNewApplicantAccount(applicant, keys, obs));
   }
 
   @Override
   public UserCode getUserCode(String txHash) {
     logger.info("Request usercode mapping for txhash={}", txHash);
-    RegistrationTx registrationTx = mongoConnector.getRegistrationMapping(txHash);
-    return new UserCode(registrationTx.getUserCode());
+    TxHash tx_hash = new TxHash(txHash);
+    if (universityService.getAccountStatus(tx_hash) != null) {
+      RegistrationTx registrationTx = mongoConnector.getRegistrationMapping(txHash);
+      return new UserCode(registrationTx.getPayload());
+    } else {
+      return new UserCode("Account does not exist");
+    }
   }
 
   @Override
@@ -96,13 +101,13 @@ public class ApplicantServiceImpl implements ApplicantService {
 
       return new ApplicantResponse(applicant, assets);
     } catch (NullPointerException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Applicant with provided userCode not found", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Applicant with provided payload not found", e);
     }
   }
 
   @Override
   public void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect) {
-
+    universityService.selectSpeciality(userCode, applicantSelect);
   }
 
   @Override
@@ -111,8 +116,9 @@ public class ApplicantServiceImpl implements ApplicantService {
   }
 
   private Asset convertAsset(AccountAsset irohaAsset) {
-    String name = irohaAsset.getAssetId();
-    String domain = irohaAsset.getAssetId();
+    String[] strings = irohaAsset.getAssetId().split("#");
+    String name = strings[0];
+    String domain = strings[1];
     int quantity = Integer.parseInt(irohaAsset.getBalance());
     return new Asset(name, domain, quantity);
   }
