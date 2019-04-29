@@ -107,14 +107,14 @@ public class IrohaMain {
 
     String uiAccountId = ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university),ChainEntitiesUtils.getUniversityDomain(university));
     val studAccountId = ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN);
-    val transaction = Transaction.builder(uiAccountId)
-            .transferAsset(uiAccountId,studAccountId, ChainEntitiesUtils.getAssetId(speciality.getName(), getUniversityDomain(university)),"",new BigDecimal(1))
-            .sign(universitiesKeys.get(university.getName()))
-            .build();
+//    val transaction = Transaction.builder(uiAccountId)
+//            .transferAsset(uiAccountId,studAccountId, ChainEntitiesUtils.getAssetId(speciality.getName(), getUniversityDomain(university)),"",new BigDecimal(1))
+//            .sign(universitiesKeys.get(university.getName()))
+//            .build();
     IrohaAPI api = IrohaApiSingletone.getIrohaApiInstance();
 
 
-    api.transaction(transaction).publish().blockingSubscribe(observer);
+    //api.transaction(transaction).publish().blockingSubscribe(observer);
     val observer1 =TransactionStatusObserver.builder()
             // executed when stateless or stateful validation is failed
             .onTransactionFailed(t -> System.out.println(String.format(
@@ -156,8 +156,8 @@ public class IrohaMain {
     }
 
     sleep(30000);
-//    Observable observable = service.getWildTokensTransaction(applicant);
-//    observable.blockingSubscribe();
+    service.getWildTokensTransaction(applicant, observer);
+    sleep(10000);
     int balance = service
         .getBalanceOfApplicant(applicant, ChainEntitiesUtils.Consts.WILD_ASSET_NAME);
     System.out.println("_______________________________________________");

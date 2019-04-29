@@ -2,6 +2,7 @@ package com.iroha.service;
 
 import com.iroha.utils.ChainEntitiesUtils;
 import java.security.KeyPair;
+import java.util.Arrays;
 import java.util.List;
 
 import com.iroha.model.Applicant;
@@ -20,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
+import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
+import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_SPECIALITY_ASSET_NAME;
 
 
 public class UniversityService {
@@ -45,19 +48,26 @@ public class UniversityService {
     val transaction = Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
         .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, Consts.UNIVERSITIES_DOMAIN), keys.getPublic())
         .sign(universityKeyPair)
-            .build();
+        .build();
     System.out.println("Transaction sent");
     api.transaction(transaction).subscribe(observer);
     System.out.println("finished");
   }
 
-  public Observable getWildTokensTransaction(Applicant applicant) {
-    val transaction = createTransactionFromUniversity(applicant, Consts.WILD_ASSET_NAME, 5);
-    return api.transaction(transaction).distinct();
+  public void getWildTokensTransaction(Applicant applicant, Observer observer) {
+    val addTokens = Transaction
+            .builder(getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
+            .addAssetQuantity(getAssetId(WILD_ASSET_NAME,UNIVERSITIES_DOMAIN),"5")
+            .sign(universityKeyPair)
+            .build();
+    api.transaction(addTokens).blockingSubscribe(observer);
+    val transaction = createTransactionFromUniversity(applicant, WILD_ASSET_NAME, 5, UNIVERSITIES_DOMAIN);
+    api.transaction(transaction).subscribe(observer);
   }
 
-  //    public Observable chooseUniversity(ResponseApplicant applicant, KeyPair keyPair)  {
+//      public Observable chooseUniversity(Applicant applicant, KeyPair keyPair)  {
 //        val removeWildTokenTransaction = createTransactionToUniversity(applicant,WILD_ASSET_NAME, 1, keyPair);
+//        Transaction.builder().addAssetQuantity().setBatchMeta().sign().build();
 //        val getSpecialityTokensTransaction = createTransactionFromUniversity(applicant,WILD_SPECIALITY_ASSET_NAME,3);
 //        val transactions = Arrays.asList(removeWildTokenTransaction,getSpecialityTokensTransaction);
 //        val chooseUniversityTransaction = buildAtomicTransaction(transactions);
@@ -95,17 +105,16 @@ public class UniversityService {
   }
 
   private TransactionOuterClass.Transaction createTransactionFromUniversity(Applicant applicant,
-      String assetType, Integer assetsQuantity) {
+      String assetType, Integer assetsQuantity, String domain) {
     String applicant_account = ChainEntitiesUtils.getApplicantAccountName(applicant);
     String university_account = ChainEntitiesUtils.getUniversityAccountName(university);
     String universityAccountId = ChainEntitiesUtils
         .getAccountId(university_account, ChainEntitiesUtils.getUniversityDomain(university));
     String applicationAccountId = ChainEntitiesUtils
-        .getAccountId(applicant_account, ChainEntitiesUtils.getUniversityDomain(university));
-    return Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),Consts.UNIVERSITIES_DOMAIN))
-        .addAssetQuantity(ChainEntitiesUtils.getAssetId(assetType, university.getName()), assetsQuantity.toString())
+        .getAccountId(applicant_account, UNIVERSITIES_DOMAIN);
+    return Transaction.builder(ChainEntitiesUtils.getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
         .transferAsset(universityAccountId, applicationAccountId,
-            ChainEntitiesUtils.getAssetId(assetType, university.getName())
+            ChainEntitiesUtils.getAssetId(assetType, domain)
             , "", assetsQuantity.toString())
         .sign(universityKeyPair)
         .build();
@@ -118,8 +127,7 @@ public class UniversityService {
         ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
             .getUniversityDomain(university)), 1)
         .getAccountAssets(
-            ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils
-                .getUniversityDomain(university)))
+            ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN))
         .buildSigned(universityKeyPair);
     val balance = api.query(query);
     val assets = balance.getAccountAssetsResponse().getAccountAssetsList();
@@ -138,8 +146,7 @@ public class UniversityService {
             ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
                     .getUniversityDomain(university)), 1)
             .getAccountAssets(
-                    ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils
-                            .getUniversityDomain(university)))
+                    ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), UNIVERSITIES_DOMAIN))
             .buildSigned(universityKeyPair);
     val balance = api.query(query);
     return balance.getAccountAssetsResponse().getAccountAssetsList();
