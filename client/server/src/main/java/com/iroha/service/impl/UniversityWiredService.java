@@ -59,7 +59,7 @@ public class UniversityWiredService {
     University uni = mongoConnector.getUniversity(applicantSelect.getUniversity());
     KeyPair uniKey = mongoConnector.getUniversityKeys(applicantSelect.getUniversity());
     KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
-    Speciality speciality = mongoConnector.getSpecialities(applicantSelect.getCode(), applicantSelect.getCode()).get(0);
+    Speciality speciality = mongoConnector.getSpecialities(applicantSelect.getCode(), applicantSelect.getUniversity()).get(0);
 
     universityService.chooseUniversity(applicant, applicantKey, getDefaultObserver(), uni, uniKey);
     universityService.chooseSpeciality(applicant, speciality, getDefaultObserver(), applicantKey, uni, uniKey);
