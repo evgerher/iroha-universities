@@ -168,9 +168,14 @@ public class IrohaMain {
     logger.info("_______________________________________________");
     logger.info("Balance [{} -> {}]", Consts.WILD_ASSET_NAME, balance);
     logger.info("_______________________________________________");
-    List<QryResponses.AccountAsset> assets =service.getAllAssertsOfApplicant(applicant);
+    List<QryResponses.AccountAsset> assets = service.getAllAssertsOfApplicant(applicant);
     for(QryResponses.AccountAsset asset: assets){
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
+    service.chooseUniversity(applicant,applicantKeys,observer, university, uniKeys.get(university.getName()));
+    assets =service.getAllAssertsOfApplicant(applicant);
+      for(QryResponses.AccountAsset asset: assets){
+          System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+      }
   }
 }
