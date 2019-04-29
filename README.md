@@ -1,5 +1,5 @@
 # iroha-universities
-===
+
 ## How to run a project
 Project is splitted into two units:
 1) `blockchain/IrohaMain` - testing custom Iroha communication (can be rewritten as tests)  
