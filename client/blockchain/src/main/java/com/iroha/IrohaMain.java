@@ -13,28 +13,25 @@ import io.reactivex.Observable;
 import iroha.protocol.BlockOuterClass;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
 
 import iroha.protocol.QryResponses;
-import jp.co.soramitsu.iroha.java.IrohaAPI;
-import jp.co.soramitsu.iroha.java.Transaction;
-import jp.co.soramitsu.iroha.java.TransactionBuilder;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
-import jp.co.soramitsu.iroha.testcontainers.IrohaContainer;
-import jp.co.soramitsu.iroha.testcontainers.PeerConfig;
 import lombok.val;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.iroha.service.GenesisGenerator.saveKey;
+import static com.iroha.service.GenesisGenerator.writeGenesisToFiles;
 import static com.iroha.utils.ChainEntitiesUtils.*;
 import static java.lang.Thread.sleep;
 
 public class IrohaMain {
+  private static final Logger logger = LoggerFactory.getLogger(IrohaMain.class);
 
   public static void main(String[] args) throws IOException, InterruptedException {
     Speciality speciality = new Speciality("ui", "cs", "", "code", 1);
@@ -52,52 +49,52 @@ public class IrohaMain {
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
     BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(Arrays.asList(university,kai,kfu));
-    writeGenesisToFile(genesis,"./docker/genesis-kai/genesis.block");
-    writeGenesisToFile(genesis,"./docker/genesis-ui/genesis.block");
-    writeGenesisToFile(genesis,"./docker/genesis-kfu/genesis.block");
+    writeGenesisToFiles(genesis, new String[]{
+        "./docker/genesis-kai/genesis.block",
+        "./docker/genesis-ui/genesis.block",
+        "./docker/genesis-kfu/genesis.block"});
 
     saveKey(university.getPeerKey(),"./docker/genesis-ui");
     saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
-    System.out.println("genesis generated");
+
+    logger.info("Genesis and keys are generated and stored");
+
     File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
     sleep(15000);
-    System.out.println("sleep finished");
+    logger.info("sleep finished");
+
     UniversityService service = new UniversityService(
         ChainEntitiesUtils.universitiesKeys.get(university.getName()),
         university);
-    System.out.println(ChainEntitiesUtils.bytesToHex(ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic().getEncoded()
-    ));
+    String pubkey = ChainEntitiesUtils.bytesToHex(ChainEntitiesUtils.universitiesKeys.get(university.getName()).getPublic().getEncoded());
+    logger.info("University pubkey={}", pubkey);
 
     val observer =TransactionStatusObserver.builder()
             // executed when stateless or stateful validation is failed
-            .onTransactionFailed(t -> System.out.println(String.format(
+            .onTransactionFailed(t -> logger.info(String.format(
                     "transaction %s failed with msg: %s",
                     t.getTxHash(),
                     t.getErrOrCmdName()
 
             )))
             // executed when got any exception in handlers or grpc
-            .onError(e -> System.out.println("Failed with exception: " + e))
+            .onError(e -> logger.info("Failed with exception: " + e))
             // executed when we receive "committed" status
-            .onTransactionCommitted((t) -> System.out.println("Committed :)"))
+            .onTransactionCommitted((t) -> logger.info("Committed :)"))
             // executed when transfer is complete (failed or succeed) and observable is closed
-            .onComplete(() -> System.out.println("Complete0"))
-            .onTransactionSent(() -> System.out.println("sent"))
-            .onNotReceived(e -> System.out.println("not received with: "+ e))
-            .onEnoughSignaturesCollected(t -> System.out.println("sigs collected: "+ t))
-            .onMstExpired(t -> System.out.println("mst expired: "+ t))
-            .onMstPending(t -> System.out.println("pending: "+ t))
-            .onStatelessValidationSuccess(t -> System.out.println("sls val: "+ t))
-            .onUnrecognizedStatus(t -> System.out.println("unrecognized"+t))
-            .onStatefulValidationSuccess(t -> System.out.println("slf val: "+ t))
-            .onUnrecognizedStatus(t -> System.out.println("HZ"))
-            .onRejected(t -> System.out.println("rejected" + t))
+            .onComplete(() -> logger.info("Complete0"))
+            .onTransactionSent(() -> logger.info("sent"))
+            .onNotReceived(e -> logger.info("not received with: "+ e))
+            .onEnoughSignaturesCollected(t -> logger.info("sigs collected: "+ t))
+            .onMstExpired(t -> logger.info("mst expired: "+ t))
+            .onMstPending(t -> logger.info("pending: "+ t))
+            .onStatelessValidationSuccess(t -> logger.info("sls val: "+ t))
+            .onUnrecognizedStatus(t -> logger.info("unrecognized"+t))
+            .onStatefulValidationSuccess(t -> logger.info("slf val: "+ t))
+            .onUnrecognizedStatus(t -> logger.info("HZ"))
+            .onRejected(t -> logger.info("rejected" + t))
             .build();
-
-
-
-
 
     Applicant applicant = new Applicant("name", "surname");
 
@@ -105,48 +102,38 @@ public class IrohaMain {
     applicant.setPkey(applicantKeys.getPrivate().toString());
     applicant.setPubkey(ChainEntitiesUtils.bytesToHex(applicantKeys.getPublic().getEncoded()));
 
-    String uiAccountId = ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getUniversityAccountName(university),ChainEntitiesUtils.getUniversityDomain(university));
-    val studAccountId = ChainEntitiesUtils.getAccountId(ChainEntitiesUtils.getApplicantAccountName(applicant), ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN);
-//    val transaction = Transaction.builder(uiAccountId)
-//            .transferAsset(uiAccountId,studAccountId, ChainEntitiesUtils.getAssetId(speciality.getName(), getUniversityDomain(university)),"",new BigDecimal(1))
-//            .sign(universitiesKeys.get(university.getName()))
-//            .build();
-    IrohaAPI api = IrohaApiSingletone.getIrohaApiInstance();
-
-
-    //api.transaction(transaction).publish().blockingSubscribe(observer);
     val observer1 =TransactionStatusObserver.builder()
             // executed when stateless or stateful validation is failed
-            .onTransactionFailed(t -> System.out.println(String.format(
+            .onTransactionFailed(t -> logger.info(String.format(
                     "transaction %s failed with msg: %s",
                     t.getTxHash(),
                     t.getErrOrCmdName()
 
             )))
             // executed when got any exception in handlers or grpc
-            .onError(e -> System.out.println("Failed with exception: " + e))
+            .onError(e -> logger.info("Failed with exception: " + e))
             // executed when we receive "committed" status
-            .onTransactionCommitted((t) -> System.out.println("Committed :)"))
+            .onTransactionCommitted((t) -> logger.info("Committed :)"))
             // executed when transfer is complete (failed or succeed) and observable is closed
-            .onComplete(() -> System.out.println("Complete1"))
+            .onComplete(() -> logger.info("Complete1"))
             .build();
 
     service.createNewApplicantAccount(applicant, applicantKeys, observer1);
     for(int i =0 ; i < 10; i++  ) {
       val observer2 =TransactionStatusObserver.builder()
               // executed when stateless or stateful validation is failed
-              .onTransactionFailed(t -> System.out.println(String.format(
+              .onTransactionFailed(t -> logger.info(String.format(
                       "transaction %s failed with msg: %s",
                       t.getTxHash(),
                       t.getErrOrCmdName()
 
               )))
               // executed when got any exception in handlers or grpc
-              .onError(e -> System.out.println("Failed with exception: " + e))
+              .onError(e -> logger.info("Failed with exception: " + e))
               // executed when we receive "committed" status
-              .onTransactionCommitted((t) -> System.out.println("Committed :)"))
+              .onTransactionCommitted((t) -> logger.info("Committed :)"))
               // executed when transfer is complete (failed or succeed) and observable is closed
-              .onComplete(() -> System.out.println("Complete2"))
+              .onComplete(() -> logger.info("Complete2"))
               .build();
       applicant.setName("name"+ Integer.toString(i));
       applicantKeys = ChainEntitiesUtils.generateKey();
@@ -155,59 +142,19 @@ public class IrohaMain {
       service.createNewApplicantAccount(applicant, applicantKeys, observer2);
     }
 
+    logger.info("Sleep for 30 secs");
     sleep(30000);
+    logger.info("Sending wild tokens to applicant={}", applicant);
+
     service.getWildTokensTransaction(applicant, observer);
     sleep(10000);
-    int balance = service
-        .getBalanceOfApplicant(applicant, ChainEntitiesUtils.Consts.WILD_ASSET_NAME);
-    System.out.println("_______________________________________________");
-    System.out.println(balance);
-    System.out.println("_______________________________________________");
+    int balance = service.getBalanceOfApplicant(applicant, Consts.WILD_ASSET_NAME);
+    logger.info("_______________________________________________");
+    logger.info("Balance [{} -> {}]", Consts.WILD_ASSET_NAME, balance);
+    logger.info("_______________________________________________");
     List<QryResponses.AccountAsset> assets =service.getAllAssertsOfApplicant(applicant);
     for(QryResponses.AccountAsset asset: assets){
-      System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+      logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
   }
-
-
-
-
-  private static void writeGenesisToFile(BlockOuterClass.Block genesis, String path) throws FileNotFoundException {
-    FileOutputStream file = new FileOutputStream(path);
-    try {
-      file.write(JsonFormat.printer().print(genesis).getBytes());
-      file.flush();
-      file.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void saveKey(KeyPair keyPair, String path) throws FileNotFoundException {
-    FileOutputStream filePub = new FileOutputStream(path+"/node.pub");
-    FileOutputStream filePriv = new FileOutputStream(path+"/node.priv");
-
-    try {
-      filePub.write(bytesToHex(keyPair.getPublic().getEncoded()).getBytes());
-      filePub.flush();
-      filePub.close();
-      filePriv.write(bytesToHex(keyPair.getPrivate().getEncoded()).getBytes());
-      filePriv.flush();
-      filePriv.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static PeerConfig getPeerConfig(University university) {
-
-    PeerConfig config = PeerConfig.builder()
-        .genesisBlock(GenesisGenerator.getGenesisBlock(Arrays.asList(university)))
-        .build();
-
-    // don't forget to add peer keypair to config
-    config.withPeerKeyPair(ChainEntitiesUtils.universitiesKeys.get(university.getName()));
-    return config;
-  }
-
 }
