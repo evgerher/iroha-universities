@@ -4,21 +4,21 @@ import com.google.protobuf.util.JsonFormat;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.utils.ChainEntitiesUtils;
+
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.*;
-import java.util.stream.Collectors;
+
 import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.testcontainers.detail.GenesisBlockBuilder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.awt.SunHints.Key;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
 

@@ -1,6 +1,5 @@
 package com.iroha;
 
-import com.google.protobuf.util.JsonFormat;
 import com.iroha.model.Applicant;
 import com.iroha.model.Asset;
 import com.iroha.model.university.Speciality;
@@ -8,8 +7,6 @@ import com.iroha.model.university.University;
 import com.iroha.service.GenesisGenerator;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
-import com.iroha.utils.IrohaApiSingletone;
-import io.reactivex.Observable;
 import iroha.protocol.BlockOuterClass;
 
 import java.io.File;
@@ -63,21 +60,22 @@ public class IrohaMain {
 //		iroha.start();
     BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, uniKeys);
     writeGenesisToFiles(genesis, new String[]{
-        "./docker/genesis-kai/genesis.block",
-        "./docker/genesis-ui/genesis.block",
-        "./docker/genesis-kfu/genesis.block"
+        "../docker/genesis-kai/genesis.block",
+        "../docker/genesis-ui/genesis.block",
+        "../docker/genesis-kfu/genesis.block"
     });
 
-    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
-    saveKey(university.getPeerKey(),"./docker/genesis-ui");
-    saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
+    saveKey(kai.getPeerKey(),"../docker/genesis-kai");
+    saveKey(university.getPeerKey(),"../docker/genesis-ui");
+    saveKey(kfu.getPeerKey(),"../docker/genesis-kfu");
 
     logger.info("Genesis and keys are generated and stored");
 
-    File dir = new File("./docker");
+    File dir = new File("../docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
-    sleep(15000);
-    logger.info("sleep finished");
+    logger.info("Sleep for 30 seconds");
+    sleep(30000);
+    logger.info("Sleep finished");
 
     UniversityService service = new UniversityService(
         uniKeys.get(university.getName()),
@@ -159,10 +157,13 @@ public class IrohaMain {
 
     logger.info("Sleep for 30 secs");
     sleep(30000);
+    logger.info("Sleep finished");
     logger.info("Sending wild tokens to applicant={}", applicant);
 
     service.getWildTokensTransaction(applicant, observer);
+    logger.info("Sleep for 10 seconds");
     sleep(10000);
+    logger.info("Sleep finished");
     int balance = service.getBalanceOfApplicant(applicant, Consts.WILD_ASSET_NAME);
     logger.info("_______________________________________________");
     logger.info("Balance [{} -> {}]", Consts.WILD_ASSET_NAME, balance);

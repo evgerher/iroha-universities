@@ -61,7 +61,7 @@ public class UniversityService {
         .sign(universityKeyPair)
         .build();
     api.transaction(transaction).subscribe(observer);
-    return transaction.getPayload().getBatch().getReducedHashes(0);
+    return ChainEntitiesUtils.bytesToHex(transaction.toByteArray());
   }
 
   /**
