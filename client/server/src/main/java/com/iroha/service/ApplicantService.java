@@ -8,7 +8,7 @@ import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.UserCode;
 
 public interface ApplicantService {
-  TxHash registerApplicant(ApplicantRegisterRequest request);
+  UserCode registerApplicant(ApplicantRegisterRequest request);
 
   UserCode getUserCode(String txHash);
 

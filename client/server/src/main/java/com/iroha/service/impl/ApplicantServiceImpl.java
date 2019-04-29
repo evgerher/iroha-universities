@@ -49,7 +49,7 @@ public class ApplicantServiceImpl implements ApplicantService {
    * @return
    */
   @Override
-  public TxHash registerApplicant(ApplicantRegisterRequest request) {
+  public UserCode registerApplicant(ApplicantRegisterRequest request) {
     Applicant applicant = new Applicant(request.getName(), request.getSurname());
 
     // Generate keys
@@ -75,7 +75,7 @@ public class ApplicantServiceImpl implements ApplicantService {
         })
         .build();
 
-    return new TxHash(universityService.createNewApplicantAccount(applicant, keys, obs));
+    return new UserCode(universityService.createNewApplicantAccount(applicant, keys, obs));
   }
 
   @Override
@@ -116,8 +116,9 @@ public class ApplicantServiceImpl implements ApplicantService {
   }
 
   private Asset convertAsset(AccountAsset irohaAsset) {
-    String name = irohaAsset.getAssetId();
-    String domain = irohaAsset.getAssetId();
+    String[] strings = irohaAsset.getAssetId().split("#");
+    String name = strings[0];
+    String domain = strings[1];
     int quantity = Integer.parseInt(irohaAsset.getBalance());
     return new Asset(name, domain, quantity);
   }

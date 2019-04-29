@@ -28,7 +28,7 @@ public class ApplicantController { // todo: expected to be used only after block
   }
 
   @RequestMapping(value="/register", method = RequestMethod.POST)
-  public TxHash registerApplicant(@RequestBody ApplicantRegisterRequest request) {
+  public UserCode registerApplicant(@RequestBody ApplicantRegisterRequest request) {
     logger.info("Register new applicant={}", request);
     return applicantService.registerApplicant(request);
   }

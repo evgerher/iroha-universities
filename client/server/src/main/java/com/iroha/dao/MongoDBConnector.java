@@ -161,7 +161,7 @@ public class MongoDBConnector {
   public Applicant getApplicant(String usercode) {
     try (MongoClient client = getClient()) {
       MongoCollection<Document> collection = getDB(client).getCollection(APPLICANTS_COLLECTION);
-      return collection.find(eq("payload", usercode))
+      return collection.find(eq("userCode", usercode))
           .map(jsonToObject(Applicant.class))
           .first();
     }

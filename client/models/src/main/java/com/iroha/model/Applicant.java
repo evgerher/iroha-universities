@@ -2,12 +2,16 @@ package com.iroha.model;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.security.KeyPair;
 import lombok.Data;
 
 @JsonInclude
 @Data
 public class Applicant {
+    private static final Gson gson = new GsonBuilder().create();
+
     private String name;
     private String surname;
     private int totalPoints;
@@ -32,5 +36,10 @@ public class Applicant {
     public void setPubkey(String pubkey) {
         this.pubkey = pubkey;
         this.userCode = getId();
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(this);
     }
 }

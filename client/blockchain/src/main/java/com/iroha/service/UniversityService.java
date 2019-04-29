@@ -18,6 +18,7 @@ import iroha.protocol.TransactionOuterClass;
 import jp.co.soramitsu.iroha.java.IrohaAPI;
 import jp.co.soramitsu.iroha.java.Query;
 import jp.co.soramitsu.iroha.java.Transaction;
+import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 import lombok.val;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class UniversityService {
   }
 
   /**
-   *
+   * Method creates new account and sends him wild tokens
    * @param applicant
    * @param keys
    * @param observer
@@ -59,7 +60,13 @@ public class UniversityService {
         .sign(universityKeyPair)
         .build();
     api.transaction(transaction).subscribe(observer);
-    return ChainEntitiesUtils.bytesToHex(transaction.toByteArray());
+
+    InlineTransactionStatusObserver obs = TransactionStatusObserver.builder()
+        .onComplete(() -> logger.info("Account with userCode={} received {} wild tokens", applicant.getUserCode()))
+        .build();
+
+    getWildTokensTransaction(applicant, obs);
+    return applicant.getUserCode();
   }
 
   /**

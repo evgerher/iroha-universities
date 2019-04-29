@@ -8,4 +8,5 @@ import lombok.Data;
 public class ApplicantRegisterRequest {
   private String name;
   private String surname;
+  private Integer totalPoints;
 }

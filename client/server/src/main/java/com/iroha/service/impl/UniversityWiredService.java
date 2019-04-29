@@ -25,7 +25,8 @@ public class UniversityWiredService {
   }
 
   public String createNewApplicantAccount(Applicant applicant, KeyPair keys, InlineTransactionStatusObserver observer) {
-    return universityService.createNewApplicantAccount(applicant, keys, observer);
+    String userCode = universityService.createNewApplicantAccount(applicant, keys, observer);
+    return userCode;
   }
 
   public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
