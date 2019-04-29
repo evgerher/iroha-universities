@@ -47,7 +47,9 @@ public class UniversityService {
                 .createAccount(ChainEntitiesUtils.getAccountId(applicantAccountName, Consts.UNIVERSITIES_DOMAIN), keys.getPublic())
                 .sign(universityKeyPair)
                 .build();
-        return transaction.getPayload().getBatch().getReducedHashes(0);
+        api.transaction(transaction).subscribe(observer);
+        System.out.println(bytesToHex(transaction.toByteArray()));
+        return bytesToHex(transaction.toByteArray());
     }
 
     public void getWildTokensTransaction(Applicant applicant, Observer observer) {
@@ -61,17 +63,18 @@ public class UniversityService {
         api.transaction(transaction).subscribe(observer);
     }
 
-    public void chooseUniversity(Applicant applicant, KeyPair keyPair, Observer observer) {
+    public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, Observer observer, University university, KeyPair universityKeyPair) {
         List<Transaction> transaction = Arrays.asList(
-                createUnsignedAddAssetsToUniversity(getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),2),
-                createUnsignedTransactionToUniversity(applicant,getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN),1),
-                createUnsignedTransactionFromUniversity(applicant,getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),3)
+                createUnsignedAddAssetsToUniversity(getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),2, university),
+                createUnsignedTransactionToUniversity(applicant,getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN),1, university),
+                createUnsignedTransactionFromUniversity(applicant,getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),3, university)
         );
-        TransactionOuterClass.Transaction atomicTransaction = Transaction.builder("")
+        String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        TransactionOuterClass.Transaction atomicTransaction = Transaction.builder(uniId)
                 .setBatchMeta(transaction, TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC)
                 .setQuorum(2)
                 .sign(universityKeyPair)
-                .sign(keyPair)
+                .sign(applicantKeyPair)
                 .build();
         api.transaction(atomicTransaction).subscribe(observer);
     }
@@ -124,7 +127,7 @@ public class UniversityService {
     }
 
     private Transaction createUnsignedTransactionFromUniversity(Applicant applicant,
-                                                                String assetId, Integer assetsQuantity) {
+                                                                String assetId, Integer assetsQuantity, University university) {
         String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
         String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
         return Transaction.builder(uniId)
@@ -132,7 +135,7 @@ public class UniversityService {
                 .build();
     }
 
-    private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity) {
+    private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity, University university) {
         String accountId = getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN);
         String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
         return Transaction.builder(accountId)
@@ -141,7 +144,7 @@ public class UniversityService {
 
     }
 
-    private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity) {
+    private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
         String accountId = getAccountId(getUniversityAccountName(university),getUniversityDomain(university));
         return Transaction.builder(accountId)
                 .addAssetQuantity(assetId,assetQunatity.toString())

@@ -155,7 +155,7 @@ public class IrohaMain {
       service.createNewApplicantAccount(applicant, applicantKeys, observer2);
     }
 
-    sleep(30000);
+    sleep(20000);
     service.getWildTokensTransaction(applicant, observer);
     sleep(10000);
     int balance = service
@@ -167,6 +167,11 @@ public class IrohaMain {
     for(QryResponses.AccountAsset asset: assets){
       System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
+    service.chooseUniversity(applicant,applicantKeys,observer, university, universitiesKeys.get(university.getName()));
+   assets =service.getAllAssertsOfApplicant(applicant);
+      for(QryResponses.AccountAsset asset: assets){
+          System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
+      }
   }
 
 
