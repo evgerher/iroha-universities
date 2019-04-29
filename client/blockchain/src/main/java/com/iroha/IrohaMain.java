@@ -60,18 +60,18 @@ public class IrohaMain {
 //		iroha.start();
     BlockOuterClass.Block genesis = GenesisGenerator.getGenesisBlock(universities, uniKeys);
     writeGenesisToFiles(genesis, new String[]{
-        "../docker/genesis-kai/genesis.block",
-        "../docker/genesis-ui/genesis.block",
-        "../docker/genesis-kfu/genesis.block"
+        "./docker/genesis-kai/genesis.block",
+        "./docker/genesis-ui/genesis.block",
+        "./docker/genesis-kfu/genesis.block"
     });
 
-    saveKey(kai.getPeerKey(),"../docker/genesis-kai");
-    saveKey(university.getPeerKey(),"../docker/genesis-ui");
-    saveKey(kfu.getPeerKey(),"../docker/genesis-kfu");
+    saveKey(kai.getPeerKey(),"./docker/genesis-kai");
+    saveKey(university.getPeerKey(),"./docker/genesis-ui");
+    saveKey(kfu.getPeerKey(),"./docker/genesis-kfu");
 
     logger.info("Genesis and keys are generated and stored");
 
-    File dir = new File("../docker");
+    File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
     logger.info("Sleep for 30 seconds");
     sleep(30000);
@@ -173,6 +173,7 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
     service.chooseUniversity(applicant,applicantKeys,observer, university, uniKeys.get(university.getName()));
+    sleep(5000);
     assets =service.getAllAssertsOfApplicant(applicant);
       for(QryResponses.AccountAsset asset: assets){
           System.out.println(String.format("%s %s",asset.getAssetId(),asset.getBalance()));

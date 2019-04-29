@@ -90,18 +90,28 @@ public class UniversityService {
 
     public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, Observer observer, University university, KeyPair universityKeyPair) {
         List<Transaction> transaction = Arrays.asList(
-                createUnsignedAddAssetsToUniversity(getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),2, university),
                 createUnsignedTransactionToUniversity(applicant,getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN),1, university),
                 createUnsignedTransactionFromUniversity(applicant,getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),3, university)
         );
         String uniId= getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
-        TransactionOuterClass.Transaction atomicTransaction = Transaction.builder(uniId)
-                .setBatchMeta(transaction, TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC)
-                .setQuorum(2)
+       Transaction atomicTransaction = Transaction.builder(uniId)
+                .addAssetQuantity(getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)), Integer.valueOf(3).toString())
+               .transferAsset(getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN),uniId,getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN),"",Integer.valueOf(1).toString())
+               .transferAsset(uniId,getAccountId(getApplicantAccountName(applicant),UNIVERSITIES_DOMAIN),getAssetId(Consts.WILD_SPECIALITY_ASSET_NAME,getUniversityDomain(university)),"",Integer.valueOf(3).toString())
+                .build();
+        System.out.println(atomicTransaction.build().getPayload().getBatchOrBuilder().getReducedHashesList());
+        TransactionOuterClass.Transaction finalTransaction = atomicTransaction
+                .makeMutable()
+                .setBatchMeta
+                        (
+                                TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType.ATOMIC,
+                                atomicTransaction.build().getPayload().getBatchOrBuilder().getReducedHashesList()
+                        )
                 .sign(universityKeyPair)
                 .sign(applicantKeyPair)
                 .build();
-        api.transaction(atomicTransaction).subscribe(observer);
+        Transaction.builder().
+        api.transaction(finalTransaction).subscribe(observer);
     }
 
     //
