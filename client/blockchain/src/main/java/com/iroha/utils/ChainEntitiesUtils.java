@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 public class ChainEntitiesUtils {
     private static final Logger logger = LoggerFactory.getLogger(ChainEntitiesUtils.class);
 
-    public final static class Consts {
-        public static final String UNIVERSITIES_DOMAIN = "universitySelection";
+    public final static class ChainLogicConstants {
+        public static final String UNIVERSITIES_DOMAIN = "university_selection";
         public static final String APPLICANT_ROLE = "applicant";
         public static final String WILD_ASSET_NAME = "wild";
         public static final String WILD_SPECIALITY_ASSET_NAME = "wild_speciality";
@@ -28,16 +28,13 @@ public class ChainEntitiesUtils {
     public static String getAssetId(String specialityName,String universityName){
         return String.format("%s#%s",specialityName, universityName);
     }
-    public static Map<String,KeyPair> generateKeys(List<String> names){
-        Map<String,KeyPair> mapping = new HashMap<>();
 
-        Ed25519Sha3 crypto = new Ed25519Sha3();
-
-        for(String name: names){
-          mapping.put(name, crypto.generateKeypair());
-        }
-        return mapping;
+    public static String getAccountId(String accountName, String domain){
+        return String.format("%s@%s",accountName,domain);
     }
+
+
+
     public static String getUniversityDomain(University university){
         return university.getName()+"domain";
     }
@@ -50,17 +47,40 @@ public class ChainEntitiesUtils {
         return university.getName()+"account";
     }
 
-    public static String getAccountId(String accountName, String domain){
-        return String.format("%s@%s",accountName,domain);
-    }
+
     public static String getApplicantAccountName(Applicant applicant){
         return applicant.getId();
     }
 
+
+
+
+    public static KeyPair getKeys(Applicant applicant) {
+        byte[] bytesPkey = ChainEntitiesUtils.hexToBytes(applicant.getPkey());
+        byte[] bytesPubKey = ChainEntitiesUtils.hexToBytes(applicant.getPubkey());
+        return Ed25519Sha3.keyPairFromBytes(bytesPkey, bytesPubKey);
+    }
+
+    public static Map<String,KeyPair> generateKeys(List<String> names){
+        Map<String,KeyPair> mapping = new HashMap<>();
+
+        Ed25519Sha3 crypto = new Ed25519Sha3();
+
+        for(String name: names){
+            logger.info("KeyPair generated for: "+ name);
+            mapping.put(name, crypto.generateKeypair());
+        }
+        return mapping;
+    }
     public static KeyPair generateKey(){
+        logger.info("Key generated");
         Ed25519Sha3 crypto = new Ed25519Sha3();
         return crypto.generateKeypair();
     }
+
+
+
+
 
     public static String bytesToHex(byte[] hashInBytes) {
         StringBuilder sb = new StringBuilder();
@@ -74,9 +94,5 @@ public class ChainEntitiesUtils {
         return DatatypeConverter.parseHexBinary(encodedBytes);
     }
 
-    public static KeyPair getKeys(Applicant applicant) {
-        byte[] bytesPkey = ChainEntitiesUtils.hexToBytes(applicant.getPkey());
-        byte[] bytesPubKey = ChainEntitiesUtils.hexToBytes(applicant.getPubkey());
-        return Ed25519Sha3.keyPairFromBytes(bytesPkey, bytesPubKey);
-    }
+
 }

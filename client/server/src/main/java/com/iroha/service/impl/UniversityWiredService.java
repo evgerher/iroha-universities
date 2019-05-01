@@ -7,6 +7,7 @@ import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
+import com.iroha.service.QueryToChainService;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 import io.reactivex.Observer;
@@ -29,6 +30,7 @@ public class UniversityWiredService {
 
   private final MongoDBConnector mongoConnector;
   private final UniversityService universityService;
+  private final QueryToChainService queryToChainService;
 
   public UniversityWiredService(String uniName,
       @Qualifier("createConnector") MongoDBConnector mongoConnector) {
@@ -36,6 +38,7 @@ public class UniversityWiredService {
     University university = mongoConnector.getUniversity(uniName);
     KeyPair keys = mongoConnector.getUniversityKeys(uniName);
     universityService = new UniversityService(keys, university);
+    queryToChainService = new QueryToChainService(keys, university);
   }
 
   /**
@@ -56,7 +59,7 @@ public class UniversityWiredService {
    */
   public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
     logger.info("Request assets of applicant={}", applicant.getUserCode());
-    return universityService.getAllAssertsOfApplicant(applicant);
+    return queryToChainService.getAllAssertsOfApplicant(applicant);
   }
 
   /**
@@ -71,7 +74,7 @@ public class UniversityWiredService {
       logger.info("Request account by txhash={}", txhash);
       RegistrationTx regTx = mongoConnector.getRegistrationMapping(txhash.getTxhash());
       String accountId = regTx.getPayload();
-      Account account = universityService.getAccount(accountId);
+      Account account = queryToChainService.getAccount(accountId);
       return account.getJsonData();
     } catch (Exception e) {
       e.printStackTrace();

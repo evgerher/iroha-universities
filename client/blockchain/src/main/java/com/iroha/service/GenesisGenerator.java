@@ -30,7 +30,7 @@ public class GenesisGenerator {
         logger.info("Generate genesis block for universities, amount={}", universities.size());
 
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
-        for( University university: universities) {
+        for (University university : universities) {
             KeyPair uniKeys = keys.get(university.getName());
             logger.info("Add peer={}, pubkey={}", university.getUri(), ChainEntitiesUtils.bytesToHex(uniKeys.getPublic().getEncoded()));
 
@@ -63,11 +63,15 @@ public class GenesisGenerator {
     }
 
     public static void writeGenesisToFiles(BlockOuterClass.Block genesis, String[] paths) {
-        for (String path: paths)
+        for (String path : paths) {
+            logger.info("Write genesis to file: " + path);
             writeGenesisToFile(genesis, path);
+        }
+
     }
 
     public static void writeGenesisToFile(BlockOuterClass.Block genesis, String path) {
+        logger.info("Write genesis to file: " + path);
         try (FileOutputStream file = new FileOutputStream(path)) {
             file.write(JsonFormat.printer().print(genesis).getBytes());
             file.flush();
@@ -77,8 +81,9 @@ public class GenesisGenerator {
     }
 
     public static void saveKey(KeyPair keyPair, String path) {
-        try (FileOutputStream filePub = new FileOutputStream(path+"/node.pub")) {
-            try (FileOutputStream filePriv = new FileOutputStream(path+"/node.priv")) {
+        logger.info("Save keys to file: " + path);
+        try (FileOutputStream filePub = new FileOutputStream(path + "/node.pub")) {
+            try (FileOutputStream filePriv = new FileOutputStream(path + "/node.priv")) {
                 filePub.write(bytesToHex(keyPair.getPublic().getEncoded()).getBytes());
                 filePub.flush();
                 filePriv.write(bytesToHex(keyPair.getPrivate().getEncoded()).getBytes());
@@ -97,26 +102,26 @@ public class GenesisGenerator {
             logger.info("Initial funding of domain={}", domain);
 
             transactions.add(Transaction.builder(null)
-                    .createAsset(Consts.WILD_SPECIALITY_ASSET_NAME, domain, 0)
+                    .createAsset(ChainLogicConstants.WILD_SPECIALITY_ASSET_NAME, domain, 0)
                     .build());
             for (Speciality speciality : university.getSpecialities()) {
                 String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));
                 String assetId = ChainEntitiesUtils.getAssetId(assetName, getUniversityDomain(university));
 
                 logger.info("Initial funding of assetName={}, assetId={}, quantity={}",
-                    assetName, assetId, speciality.getQuantity());
+                        assetName, assetId, speciality.getQuantity());
                 transactions.add(Transaction
                         .builder(null)
                         .createAsset(assetName, ChainEntitiesUtils.getUniversityDomain(university), 0)
                         .build());
-                transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
+                transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university), getUniversityDomain(university)))
                         .addAssetQuantity(assetId, new BigDecimal(speciality.getQuantity()))
                         .build());
 
             }
         }
         transactions.add(Transaction.builder(null)
-                .createAsset(Consts.WILD_ASSET_NAME, Consts.UNIVERSITIES_DOMAIN, 0)
+                .createAsset(ChainLogicConstants.WILD_ASSET_NAME, ChainLogicConstants.UNIVERSITIES_DOMAIN, 0)
                 .build());
         return transactions;
     }
@@ -125,14 +130,15 @@ public class GenesisGenerator {
     private static List<Transaction> getDomains(List<University> universities) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
+            logger.info("Create domain in genesis for university:"+ university.getName());
             transactions.add(Transaction.builder(null)
                     .createDomain(ChainEntitiesUtils.getUniversityDomain(university), ChainEntitiesUtils
-                        .getUniversityRole(university))
+                            .getUniversityRole(university))
                     .build()
             );
         }
         transactions.add(Transaction.builder(null)
-                .createDomain(Consts.UNIVERSITIES_DOMAIN, Consts.APPLICANT_ROLE)
+                .createDomain(ChainLogicConstants.UNIVERSITIES_DOMAIN, ChainLogicConstants.APPLICANT_ROLE)
                 .build()
         );
         return transactions;
@@ -141,6 +147,7 @@ public class GenesisGenerator {
     private static List<Transaction> getRequiredRoles(List<University> universities) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
+            logger.info("Create role in genesis for university:"+ university.getName());
             transactions.add(Transaction.builder(null)
                     .createRole(ChainEntitiesUtils.getUniversityRole(university),
                             Arrays.asList(
@@ -160,7 +167,7 @@ public class GenesisGenerator {
 
         }
         transactions.add(Transaction.builder(null)
-                .createRole(Consts.APPLICANT_ROLE,
+                .createRole(ChainLogicConstants.APPLICANT_ROLE,
                         Arrays.asList(
                                 RolePermission.can_receive,
                                 RolePermission.can_transfer,
@@ -174,9 +181,10 @@ public class GenesisGenerator {
     private static List<Transaction> getAccounts(List<University> universities, Map<String, KeyPair> universitiesKeys) {
         List<Transaction> transactions = new ArrayList<>();
         for (University university : universities) {
+            logger.info("Create daccount in genesis for university:"+ university.getName());
             transactions.add(Transaction.builder(null)
                     .createAccount(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
-                        .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
+                            .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;

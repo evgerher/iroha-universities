@@ -5,15 +5,16 @@ import jp.co.soramitsu.iroha.java.IrohaAPI;
 
 public class IrohaApiSingletone {
     private static IrohaAPI api;
-    private IrohaApiSingletone(){
-        api = new IrohaAPI(IrohaConfig.host,IrohaConfig.port);
+
+    private IrohaApiSingletone() {
+        api = new IrohaAPI(IrohaConfig.host, IrohaConfig.port);
     }
 
-    public static IrohaAPI getIrohaApiInstance(){
-        if(api == null){
+    public static IrohaAPI getIrohaApiInstance() {
+        if (api == null) {
             new IrohaApiSingletone();
             return api;
-        }else {
+        } else {
             return api;
         }
     }
