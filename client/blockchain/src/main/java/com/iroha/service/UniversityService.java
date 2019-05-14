@@ -114,7 +114,7 @@ public class UniversityService {
      * @param university
      * @param universityKeyPair
      */
-    public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, Observer<iroha.protocol.Endpoint.ToriiResponse> observer, University university, KeyPair universityKeyPair) {
+    public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, University university, KeyPair universityKeyPair, Observer<iroha.protocol.Endpoint.ToriiResponse> observer) {
         val transactions = Arrays.asList(
                 createUnsignedAddAssetsToUniversity(getAssetId(ChainLogicConstants.WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 3, university).sign(universityKeyPair).build(),
                 createUnsignedTransactionToUniversity(applicant, getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN), 1, university).sign(applicantKeyPair).build(),
@@ -147,7 +147,7 @@ public class UniversityService {
      * @param university
      * @param universityKeyPair
      */
-    public void chooseSpeciality(Applicant applicant, Speciality speciality, Observer<iroha.protocol.Endpoint.ToriiResponse> observer, KeyPair applicantKeyPair, University university, KeyPair universityKeyPair) {
+    public void chooseSpeciality(Applicant applicant, Speciality speciality, KeyPair applicantKeyPair, University university, KeyPair universityKeyPair, Observer<iroha.protocol.Endpoint.ToriiResponse> observer) {
         val assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));
         val transactions = Arrays.asList(
                 createUnsignedTransactionToUniversity(applicant, getAssetId(ChainLogicConstants.WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 1, university).sign(applicantKeyPair).build(),

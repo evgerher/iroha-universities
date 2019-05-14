@@ -87,26 +87,31 @@ public class UniversityWiredService {
    * already selected - applicant assets won't change If speciality is already selected - applicant
    * assets won't change If error occured - applicant assets won't change
    *
-   * @param userCode of the applicant
-   * @param applicantSelect selected speciality
+   * @param applicant
+   * @param university to select from
+   * @param speciality selected
    */
-  public void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect) {
-    Applicant applicant = mongoConnector.getApplicant(userCode);
-    University uni = mongoConnector.getUniversity(applicantSelect.getUniversity());
-    KeyPair uniKey = mongoConnector.getUniversityKeys(applicantSelect.getUniversity());
+  public void selectSpeciality(Applicant applicant, University university, Speciality speciality) {
+    KeyPair uniKey = mongoConnector.getUniversityKeys(university.getName());
     KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
-    Speciality speciality = mongoConnector
-        .getSpecialities(applicantSelect.getCode(), applicantSelect.getUniversity()).get(0);
 
-    universityService.chooseUniversity(applicant, applicantKey, getDefaultObserver(), uni, uniKey);
-    universityService
-        .chooseSpeciality(applicant, speciality, getDefaultObserver(), applicantKey, uni, uniKey);
+    universityService.chooseUniversity(applicant, applicantKey, university, uniKey, getDefaultObserver());
+    universityService.chooseSpeciality(applicant, speciality, applicantKey, university, uniKey, getDefaultObserver());
+  }
+
+  public void swapUniversity(Applicant applicant, University universityFrom, Speciality specialityFrom,
+      University universityTo, Speciality specialityTo) {
+    KeyPair uniToKey = mongoConnector.getUniversityKeys(universityTo.getName());
+    KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
+
+    universityService.swapUniversity(applicant, universityFrom, specialityFrom, universityTo,
+        applicantKey, uniToKey, getDefaultObserver());
   }
 
   /**
    * Method generates default logging observer
    */
-  public static Observer getDefaultObserver() {
+  private static Observer getDefaultObserver() {
     return TransactionStatusObserver.builder()
         // executed when stateless or stateful validation is failed
         .onTransactionFailed(t -> logger.info(String.format(
