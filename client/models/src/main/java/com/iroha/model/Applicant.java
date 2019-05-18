@@ -24,7 +24,6 @@ public class Applicant {
         this.surname = surname;
     }
 
-
     public String getId(){
         String id =  pubkey.replaceAll("[0-9]{1,30}",""); //for satisfying iroha accountId/name requirements
         if (id.length()>30){
