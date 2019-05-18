@@ -3,7 +3,6 @@ package com.iroha.service.impl;
 import com.iroha.dao.MongoDBConnector;
 import com.iroha.model.Applicant;
 import com.iroha.model.applicant.TxHash;
-import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
@@ -83,7 +82,19 @@ public class UniversityWiredService {
   }
 
   /**
-   * Method utilizes two atomic batches: select university & select speciality If university is
+   * Method exchanges (university wild token -> specific university 5 speciality wild tokens)
+   * @param applicant
+   * @param university
+   */
+  public void selectUniversity(Applicant applicant, University university) {
+    KeyPair uniKey = mongoConnector.getUniversityKeys(university.getName());
+    KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
+
+    universityService.chooseUniversity(applicant, applicantKey, university, uniKey, getDefaultObserver());
+  }
+
+  /**
+   * Method utilizes two atomic batches:  select speciality If university is
    * already selected - applicant assets won't change If speciality is already selected - applicant
    * assets won't change If error occured - applicant assets won't change
    *
@@ -95,7 +106,6 @@ public class UniversityWiredService {
     KeyPair uniKey = mongoConnector.getUniversityKeys(university.getName());
     KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
 
-    universityService.chooseUniversity(applicant, applicantKey, university, uniKey, getDefaultObserver());
     universityService.chooseSpeciality(applicant, speciality, applicantKey, university, uniKey, getDefaultObserver());
   }
 

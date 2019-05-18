@@ -1,6 +1,7 @@
 package com.iroha.controller;
 
 import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.requests.SelectUniversityRequest;
 import com.iroha.model.applicant.responses.ApplicantResponse;
 import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
 import com.iroha.model.applicant.requests.SelectSpecialityRequest;
@@ -19,7 +20,6 @@ import org.testcontainers.shaded.javax.ws.rs.QueryParam;
 @RequestMapping("/applicant")
 public class ApplicantController { // todo: expected to be used only after blockchain start
   private static final Logger logger = LoggerFactory.getLogger(ApplicantController.class);
-
   private final ApplicantService applicantService;
 
   @Autowired
@@ -45,23 +45,31 @@ public class ApplicantController { // todo: expected to be used only after block
     return applicantService.getApplicant(userCode);
   }
 
-  @RequestMapping(value="/select", method = RequestMethod.POST)
+  @RequestMapping(value="/select-speciality", method = RequestMethod.POST)
   public void selectSpeciality(@RequestHeader(value="User-Code") String userCode,
       @RequestBody SelectSpecialityRequest applicantSelect) {
     // todo: return track code ???
 
-    logger.info("ApplicantResponse with usercode={} selects speciality code={}, university={}",
-        userCode, applicantSelect.getCode(), applicantSelect.getUniversity());
+    logger.info("SelectSpecialityRequest={} with usercode={}", applicantSelect, userCode);
     applicantService.selectSpeciality(userCode, applicantSelect);
   }
+
+  @RequestMapping(value="/select-university", method = RequestMethod.POST)
+  public void selectUniversity(@RequestHeader(value="User-Code") String userCode,
+      @RequestBody SelectUniversityRequest applicantSelect) {
+    // todo: return track code ???
+
+    logger.info("SelectUniversityRequest={} with usercode={}", applicantSelect, userCode);
+    applicantService.selectUniversity(userCode, applicantSelect);
+  }
+
 
   @RequestMapping(value="/exchange", method = RequestMethod.POST)
   public void exchangeAssets(@RequestHeader(value="User-Code") String userCode,
       @RequestBody ExchangeSpecialityRequest applicantExchange) {
     // todo: return track code ???
 
-    logger.info("ApplicantResponse with usercode={} exchanges speciality from={}, to={}",
-        userCode, applicantExchange.getFrom(), applicantExchange.getTo());
+    logger.info("ExchangeSpecialityRequest={} with usercode={}", applicantExchange, userCode);
     applicantService.exchangeSpecialities(userCode, applicantExchange);
   }
 }

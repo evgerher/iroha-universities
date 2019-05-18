@@ -5,6 +5,7 @@ import com.iroha.model.Applicant;
 import com.iroha.model.Asset;
 import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.requests.SelectUniversityRequest;
 import com.iroha.model.applicant.responses.ApplicantResponse;
 import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
 import com.iroha.model.applicant.requests.SelectSpecialityRequest;
@@ -152,6 +153,14 @@ public class ApplicantServiceImpl implements ApplicantService {
 
     universityService.swapUniversity(applicant, universityFrom, specialityFrom,
         universityTo, specialityTo);
+  }
+
+  @Override
+  public void selectUniversity(String userCode, SelectUniversityRequest applicantSelect) {
+    Applicant applicant = mongoConnector.getApplicant(userCode);
+    University university = mongoConnector.getUniversity(applicantSelect.getUniversity());
+
+    universityService.selectUniversity(applicant, university);
   }
 
   /**
