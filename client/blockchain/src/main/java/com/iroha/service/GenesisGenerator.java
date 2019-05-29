@@ -30,7 +30,7 @@ public class GenesisGenerator {
         logger.info("Generate genesis block for universities, amount={}", universities.size());
 
         GenesisBlockBuilder genesisbuilder = new GenesisBlockBuilder();
-        for( University university: universities) {
+        for (University university : universities) {
             KeyPair uniKeys = keys.get(university.getName());
             logger.info("Add peer={}, pubkey={}", university.getUri(), ChainEntitiesUtils.bytesToHex(uniKeys.getPublic().getEncoded()));
 
@@ -62,33 +62,6 @@ public class GenesisGenerator {
         return genesisbuilder.build();
     }
 
-    public static void writeGenesisToFiles(BlockOuterClass.Block genesis, String[] paths) {
-        for (String path: paths)
-            writeGenesisToFile(genesis, path);
-    }
-
-    public static void writeGenesisToFile(BlockOuterClass.Block genesis, String path) {
-        try (FileOutputStream file = new FileOutputStream(path)) {
-            file.write(JsonFormat.printer().print(genesis).getBytes());
-            file.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void saveKey(KeyPair keyPair, String path) {
-        try (FileOutputStream filePub = new FileOutputStream(path+"/node.pub")) {
-            try (FileOutputStream filePriv = new FileOutputStream(path+"/node.priv")) {
-                filePub.write(bytesToHex(keyPair.getPublic().getEncoded()).getBytes());
-                filePub.flush();
-                filePriv.write(bytesToHex(keyPair.getPrivate().getEncoded()).getBytes());
-                filePriv.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     private static List<Transaction> initialFunding(List<University> universities) {
         List<Transaction> transactions = new ArrayList<>();
@@ -104,12 +77,12 @@ public class GenesisGenerator {
                 String assetId = ChainEntitiesUtils.getAssetId(assetName, getUniversityDomain(university));
 
                 logger.info("Initial funding of assetName={}, assetId={}, quantity={}",
-                    assetName, assetId, speciality.getQuantity());
+                        assetName, assetId, speciality.getQuantity());
                 transactions.add(Transaction
                         .builder(null)
                         .createAsset(assetName, ChainEntitiesUtils.getUniversityDomain(university), 0)
                         .build());
-                transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university),getUniversityDomain(university)))
+                transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university), getUniversityDomain(university)))
                         .addAssetQuantity(assetId, new BigDecimal(speciality.getQuantity()))
                         .build());
 
@@ -127,7 +100,7 @@ public class GenesisGenerator {
         for (University university : universities) {
             transactions.add(Transaction.builder(null)
                     .createDomain(ChainEntitiesUtils.getUniversityDomain(university), ChainEntitiesUtils
-                        .getUniversityRole(university))
+                            .getUniversityRole(university))
                     .build()
             );
         }
@@ -176,7 +149,7 @@ public class GenesisGenerator {
         for (University university : universities) {
             transactions.add(Transaction.builder(null)
                     .createAccount(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
-                        .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
+                            .getUniversityDomain(university), universitiesKeys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;

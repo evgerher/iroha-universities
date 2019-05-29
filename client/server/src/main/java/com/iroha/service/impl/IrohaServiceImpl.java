@@ -5,6 +5,7 @@ import com.iroha.dao.model.UniversityKeys;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.service.*;
+import com.iroha.utils.GenesisGeneratorUtils;
 import iroha.protocol.BlockOuterClass;
 
 import java.io.File;
@@ -68,16 +69,16 @@ public class IrohaServiceImpl implements IrohaService {
           ));
 
       BlockOuterClass.Block genesis = createGenesisBlock(uniKeyPairs);
-      GenesisGenerator.writeGenesisToFiles(genesis, new String[]{
+      GenesisGeneratorUtils.writeGenesisToFiles(genesis, new String[]{
           "../docker/genesis-kai/genesis.block",
           "../docker/genesis-ui/genesis.block",
           "../docker/genesis-kfu/genesis.block"
       });
 
       // KeyPairs (node.pub, node.priv)
-      GenesisGenerator.saveKey(uniKeyPairs.get("kai"), "../docker/genesis-kai");
-      GenesisGenerator.saveKey(uniKeyPairs.get("kfu"), "../docker/genesis-kfu");
-      GenesisGenerator.saveKey(uniKeyPairs.get("ui"), "../docker/genesis-ui");
+      GenesisGeneratorUtils.saveKey(uniKeyPairs.get("kai"), "../docker/genesis-kai");
+      GenesisGeneratorUtils.saveKey(uniKeyPairs.get("kfu"), "../docker/genesis-kfu");
+      GenesisGeneratorUtils.saveKey(uniKeyPairs.get("ui"), "../docker/genesis-ui");
 //    GenesisGenerator.saveKey(uniKeyPairs.get("SPIBI"), "../docker/genesis-spibi/");
 
       File dir = new File("../docker");
