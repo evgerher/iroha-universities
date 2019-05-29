@@ -1,6 +1,5 @@
 package com.iroha.service;
 
-import com.google.protobuf.util.JsonFormat;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.utils.ChainEntitiesUtils;
@@ -8,8 +7,6 @@ import com.iroha.utils.ChainEntitiesUtils;
 import iroha.protocol.BlockOuterClass;
 import iroha.protocol.Primitive.RolePermission;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.*;

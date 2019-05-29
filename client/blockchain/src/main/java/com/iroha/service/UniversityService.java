@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import static com.iroha.utils.ChainEntitiesUtils.*;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
-import static io.reactivex.Flowable.zip;
 
 
 public class UniversityService {
