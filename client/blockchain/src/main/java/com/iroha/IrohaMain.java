@@ -1,17 +1,13 @@
 package com.iroha;
 
 import com.iroha.model.Applicant;
-import com.iroha.model.Asset;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.service.GenesisGenerator;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
-import com.iroha.utils.IrohaApiSingletone;
 import iroha.protocol.BlockOuterClass;
 
-import iroha.protocol.TransactionOuterClass;
-import iroha.protocol.TransactionOuterClass.Transaction.Payload.BatchMeta.BatchType;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -21,16 +17,14 @@ import java.util.List;
 import iroha.protocol.QryResponses;
 import java.util.Map;
 import java.util.stream.Collectors;
-import jp.co.soramitsu.iroha.java.IrohaAPI;
-import jp.co.soramitsu.iroha.java.Transaction;
 import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import lombok.val;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.iroha.service.GenesisGenerator.saveKey;
-import static com.iroha.service.GenesisGenerator.writeGenesisToFiles;
+import static com.iroha.utils.GenesisGeneratorUtils.saveKey;
+import static com.iroha.utils.GenesisGeneratorUtils.writeGenesisToFiles;
 import static com.iroha.utils.ChainEntitiesUtils.*;
 import static java.lang.Thread.sleep;
 
@@ -78,8 +72,8 @@ public class IrohaMain {
 
     File dir = new File("./docker");
     Process p = Runtime.getRuntime().exec(new String[]{"docker-compose","up", "-d"},null, dir);
-    logger.info("Sleep for 30 seconds");
-    sleep(30000);
+    logger.info("Sleep for 100 seconds");
+    sleep(100000);
     logger.info("Sleep finished");
 
     UniversityService service = new UniversityService(
