@@ -52,7 +52,7 @@ public class IrohaServiceImpl implements IrohaService {
       specsMap.get(spec.getUniversity()).add(spec);
     }
 
-    return GenesisGenerator.getGenesisBlock(universities, keys);
+    return GenesisGeneratorImpl.getGenesisBlock(universities, keys);
   }
 
   /**
@@ -79,7 +79,7 @@ public class IrohaServiceImpl implements IrohaService {
       GenesisGeneratorUtils.saveKey(uniKeyPairs.get("kai"), "../docker/genesis-kai");
       GenesisGeneratorUtils.saveKey(uniKeyPairs.get("kfu"), "../docker/genesis-kfu");
       GenesisGeneratorUtils.saveKey(uniKeyPairs.get("ui"), "../docker/genesis-ui");
-//    GenesisGenerator.saveKey(uniKeyPairs.get("SPIBI"), "../docker/genesis-spibi/");
+//    GenesisGeneratorImpl.saveKey(uniKeyPairs.get("SPIBI"), "../docker/genesis-spibi/");
 
       File dir = new File("../docker");
       Runtime.getRuntime().exec(new String[]{"docker-compose", "up", "-d"}, null, dir);

@@ -7,7 +7,6 @@ import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
-import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 import io.reactivex.Observer;
 import iroha.protocol.QryResponses.Account;
@@ -21,21 +20,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Class wrapper around UniversityService (provided by blockchain module)
+ * Class wrapper around UniversityServiceImpl (provided by blockchain module)
  */
 public class UniversityWiredService {
 
   private static final Logger logger = LoggerFactory.getLogger(UniversityWiredService.class);
 
   private final MongoDBConnector mongoConnector;
-  private final UniversityService universityService;
+  private final UniversityServiceImpl universityService;
 
   public UniversityWiredService(String uniName,
       @Qualifier("createConnector") MongoDBConnector mongoConnector) {
     this.mongoConnector = mongoConnector;
     University university = mongoConnector.getUniversity(uniName);
     KeyPair keys = mongoConnector.getUniversityKeys(uniName);
-    universityService = new UniversityService(keys, university);
+    universityService = new UniversityServiceImpl(keys, university);
   }
 
   /**
