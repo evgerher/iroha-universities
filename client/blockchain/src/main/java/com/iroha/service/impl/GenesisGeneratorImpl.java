@@ -1,11 +1,9 @@
 package com.iroha.service.impl;
 
-import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.utils.ChainEntitiesUtils;
 
 import iroha.protocol.BlockOuterClass;
-import iroha.protocol.Primitive.RolePermission;
 
 import java.math.BigDecimal;
 import java.security.KeyPair;
@@ -20,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.iroha.utils.ChainEntitiesUtils.*;
+import static com.iroha.utils.ChainEntitiesUtils.Consts.*;
 import static com.iroha.utils.GenesisGeneratorUtils.applicantRolePermissions;
 import static com.iroha.utils.GenesisGeneratorUtils.universityRolePermissions;
 
@@ -29,41 +28,42 @@ public class GenesisGeneratorImpl {
     private List<University> universities;
     private Map<String, KeyPair> keys;
 
-    public GenesisGeneratorImpl(List<University> universities, Map<String, KeyPair> keys){
+    public GenesisGeneratorImpl(List<University> universities, Map<String, KeyPair> keys) {
         this.universities = universities;
         this.keys = keys;
     }
 
-    public  BlockOuterClass.Block getGenesisBlock() {
+    public BlockOuterClass.Block getGenesisBlock() {
         logger.info("Generate genesis block for universities, amount={}", universities.size());
 
         var genesisBuilder = new GenesisBlockBuilder();
-        for (University university : universities) {
-            KeyPair uniKeys = keys.get(university.getName());
+        for (var university : universities) {
+            var uniKeys = keys.get(university.getName());
             logger.info("Add peer={}, pubkey={}", university.getUri(), ChainEntitiesUtils.bytesToHex(uniKeys.getPublic().getEncoded()));
 
             genesisBuilder = genesisBuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
                     .addPeer(university.getUri(), keys.get(university.getName()).getPublic())
-                    .build().build());
+                    .build()
+                    .build());
         }
 
         logger.info("Add roles for each university");
-        for (Transaction transaction : getRequiredRoles()) {
+        for (var transaction : getRequiredRoles()) {
             genesisBuilder = genesisBuilder.addTransaction(transaction.build());
         }
 
         logger.info("Add domains for each university");
-        for (Transaction transaction : getDomains()) {
+        for (var transaction : getDomains()) {
             genesisBuilder = genesisBuilder.addTransaction(transaction.build());
         }
 
         logger.info("Add accounts for each university");
-        for (Transaction transaction : getAccounts()) {
+        for (var transaction : getAccounts()) {
             genesisBuilder = genesisBuilder.addTransaction(transaction.build());
         }
 
         logger.info("Add initial funding for each university");
-        for (Transaction transaction : initialFunding()) {
+        for (var transaction : initialFunding()) {
             genesisBuilder = genesisBuilder.addTransaction(transaction.build());
         }
 
@@ -71,24 +71,24 @@ public class GenesisGeneratorImpl {
     }
 
 
-    private  List<Transaction> initialFunding() {
+    private List<Transaction> initialFunding() {
         List<Transaction> transactions = new ArrayList<>();
-        for (University university : universities) {
-            String domain = ChainEntitiesUtils.getUniversityDomain(university);
+        for (var university : universities) {
+            var domain = getUniversityDomain(university);
             logger.info("Initial funding of domain={}", domain);
 
             transactions.add(Transaction.builder(null)
-                    .createAsset(Consts.WILD_SPECIALITY_ASSET_NAME, domain, 0)
+                    .createAsset(WILD_SPECIALITY_ASSET_NAME, domain, 0)
                     .build());
-            for (Speciality speciality : university.getSpecialities()) {
-                String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));
-                String assetId = ChainEntitiesUtils.getAssetId(assetName, getUniversityDomain(university));
+            for (var speciality : university.getSpecialities()) {
+                var assetName = getAssetName(speciality.getName(), getUniversityDomain(university));
+                var assetId = getAssetId(assetName, getUniversityDomain(university));
 
                 logger.info("Initial funding of assetName={}, assetId={}, quantity={}",
                         assetName, assetId, speciality.getQuantity());
                 transactions.add(Transaction
                         .builder(null)
-                        .createAsset(assetName, ChainEntitiesUtils.getUniversityDomain(university), 0)
+                        .createAsset(assetName, getUniversityDomain(university), 0)
                         .build());
                 transactions.add(Transaction.builder(getAccountId(getUniversityAccountName(university), getUniversityDomain(university)))
                         .addAssetQuantity(assetId, new BigDecimal(speciality.getQuantity()))
@@ -97,7 +97,7 @@ public class GenesisGeneratorImpl {
             }
         }
         transactions.add(Transaction.builder(null)
-                .createAsset(Consts.WILD_ASSET_NAME, Consts.UNIVERSITIES_DOMAIN, 0)
+                .createAsset(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN, 0)
                 .build());
         return transactions;
     }
@@ -105,7 +105,7 @@ public class GenesisGeneratorImpl {
 
     private List<Transaction> getDomains() {
         List<Transaction> transactions = new ArrayList<>();
-        for (University university : universities) {
+        for (var university : universities) {
             transactions.add(Transaction.builder(null)
                     .createDomain(ChainEntitiesUtils.getUniversityDomain(university), ChainEntitiesUtils
                             .getUniversityRole(university))
@@ -113,7 +113,7 @@ public class GenesisGeneratorImpl {
             );
         }
         transactions.add(Transaction.builder(null)
-                .createDomain(Consts.UNIVERSITIES_DOMAIN, Consts.APPLICANT_ROLE)
+                .createDomain(UNIVERSITIES_DOMAIN, APPLICANT_ROLE)
                 .build()
         );
         return transactions;
@@ -121,26 +121,24 @@ public class GenesisGeneratorImpl {
 
     private List<Transaction> getRequiredRoles() {
         List<Transaction> transactions = new ArrayList<>();
-        for (University university : universities) {
+        for (var university : universities) {
             transactions.add(Transaction.builder(null)
-                    .createRole(ChainEntitiesUtils.getUniversityRole(university),
-                        universityRolePermissions
-                    ).build());
+                    .createRole(getUniversityRole(university), universityRolePermissions)
+                    .build());
 
         }
         transactions.add(Transaction.builder(null)
-                .createRole(Consts.APPLICANT_ROLE,
-                        applicantRolePermissions
-                ).build());
+                .createRole(APPLICANT_ROLE, applicantRolePermissions)
+                .build());
         return transactions;
     }
 
     private List<Transaction> getAccounts() {
         List<Transaction> transactions = new ArrayList<>();
-        for (University university : universities) {
+        for (var university : universities) {
             transactions.add(Transaction.builder(null)
-                    .createAccount(ChainEntitiesUtils.getUniversityAccountName(university), ChainEntitiesUtils
-                            .getUniversityDomain(university), keys.get(university.getName()).getPublic())
+                    .createAccount(getUniversityAccountName(university),
+                            getUniversityDomain(university), keys.get(university.getName()).getPublic())
                     .build());
         }
         return transactions;
