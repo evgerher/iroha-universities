@@ -37,9 +37,10 @@ public class GenesisGeneratorImpl {
         logger.info("Generate genesis block for universities, amount={}", universities.size());
 
         var genesisBuilder = new GenesisBlockBuilder();
+
         for (var university : universities) {
             var uniKeys = keys.get(university.getName());
-            logger.info("Add peer={}, pubkey={}", university.getUri(), ChainEntitiesUtils.bytesToHex(uniKeys.getPublic().getEncoded()));
+            logger.info("Add peer={}, pubkey={}", university.getUri(), bytesToHex(uniKeys.getPublic().getEncoded()));
 
             genesisBuilder = genesisBuilder.addTransaction(Transaction.builder(null)  //TODO remove, `dded for testing
                     .addPeer(university.getUri(), keys.get(university.getName()).getPublic())
@@ -107,8 +108,7 @@ public class GenesisGeneratorImpl {
         List<Transaction> transactions = new ArrayList<>();
         for (var university : universities) {
             transactions.add(Transaction.builder(null)
-                    .createDomain(ChainEntitiesUtils.getUniversityDomain(university), ChainEntitiesUtils
-                            .getUniversityRole(university))
+                    .createDomain(getUniversityDomain(university), getUniversityRole(university))
                     .build()
             );
         }
