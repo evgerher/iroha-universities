@@ -1,7 +1,7 @@
 package com.iroha.service.impl;
 
 import com.iroha.model.university.Speciality;
-import com.iroha.utils.ChainEntitiesUtils;
+import com.iroha.service.UniversityService;
 import iroha.protocol.Queries;
 
 import java.security.KeyPair;
@@ -36,7 +36,7 @@ import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_SPECIALITY_ASSET_NAME;
 import static com.iroha.utils.IrohaUtils.createBatch;
 
-public class UniversityServiceImpl {
+public class UniversityServiceImpl implements UniversityService {
 
     private final int NUM_UNIVERSITY_OPTIONS = 5;
     private static final Logger logger = LoggerFactory.getLogger(UniversityServiceImpl.class);
@@ -64,6 +64,7 @@ public class UniversityServiceImpl {
      * @param observer
      * @return trasaction .createAccount hash (probably)
      */
+    @Override
     public String createNewApplicantAccount(Applicant applicant, KeyPair keys, InlineTransactionStatusObserver observer) {
         val applicantAccountName = getApplicantAccountName(applicant);
         val domain = getUniversityDomain(university);
@@ -100,6 +101,7 @@ public class UniversityServiceImpl {
         api.transaction(transaction).subscribe(observer);
     }
 
+    @Override
     public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, Observer observer, University university, KeyPair universityKeyPair) {
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
                 createUnsignedAddAssetsToUniversity(getAssetId(WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 3, university)
@@ -127,6 +129,7 @@ public class UniversityServiceImpl {
 
     }
 
+    @Override
     public void chooseSpeciality(Applicant applicant, Speciality speciality, Observer observer, KeyPair applicantKeyPair, University university, KeyPair universityKeyPair) {
         val assetName = getAssetName(speciality.getName(), getUniversityDomain(university));
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
@@ -150,13 +153,15 @@ public class UniversityServiceImpl {
         }
     }
 
+    @Override
     public void returnAllUniversityTokens(Applicant applicant, University university){
 
     }
 
+    @Override
     public void changeSpeciality(Applicant applicant, University sourceUniversity,
-                                University destinationUniversity,Speciality currentSpeciality,Speciality newSpeciality, KeyPair aplicantKey,
-                               KeyPair destUniKey, Observer observer) {
+                                 University destinationUniversity, Speciality currentSpeciality, Speciality newSpeciality, KeyPair aplicantKey,
+                                 KeyPair destUniKey, Observer observer) {
         if (!canApplicantChooseUniversity(applicant,destinationUniversity)){
             throw new IllegalArgumentException("Can't get speciality for destination university");
         }
