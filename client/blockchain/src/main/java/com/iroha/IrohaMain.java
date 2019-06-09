@@ -3,6 +3,7 @@ package com.iroha;
 import com.iroha.model.Applicant;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
+import com.iroha.service.GenesisGenerator;
 import com.iroha.service.impl.GenesisGeneratorImpl;
 import com.iroha.service.impl.UniversityServiceImpl;
 import com.iroha.utils.ChainEntitiesUtils;
@@ -57,7 +58,8 @@ public class IrohaMain {
 //		IrohaContainer iroha = new IrohaContainer()
 //				.withPeerConfig(getPeerConfig(university));
 //		iroha.start();
-    BlockOuterClass.Block genesis = GenesisGeneratorImpl.getGenesisBlock(universities, uniKeys);
+    GenesisGenerator genesisGenerator = new GenesisGeneratorImpl(universities, uniKeys);
+    BlockOuterClass.Block genesis = genesisGenerator.getGenesisBlock();
     writeGenesisToFiles(genesis, new String[]{
         "./docker/genesis-kai/genesis.block",
         "./docker/genesis-ui/genesis.block",
@@ -191,7 +193,7 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
 
-    service.swapUniversity(applicant,university,speciality,kai,applicantKeys, uniKeys.get(kai.getName()), observer);
+    service.changeSpeciality(applicant,university,kai,speciality,speciality,applicantKeys, uniKeys.get(kai.getName()), observer);
     logger.info("Sleep for 10 seconds");
 
     sleep(20000);

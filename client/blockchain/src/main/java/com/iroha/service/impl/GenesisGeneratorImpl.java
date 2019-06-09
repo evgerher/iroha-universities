@@ -1,6 +1,7 @@
 package com.iroha.service.impl;
 
 import com.iroha.model.university.University;
+import com.iroha.service.GenesisGenerator;
 import com.iroha.utils.ChainEntitiesUtils;
 
 import iroha.protocol.BlockOuterClass;
@@ -22,7 +23,7 @@ import static com.iroha.utils.ChainEntitiesUtils.Consts.*;
 import static com.iroha.utils.GenesisGeneratorUtils.applicantRolePermissions;
 import static com.iroha.utils.GenesisGeneratorUtils.universityRolePermissions;
 
-public class GenesisGeneratorImpl {
+public class GenesisGeneratorImpl implements GenesisGenerator {
     private static final Logger logger = LoggerFactory.getLogger(GenesisGeneratorImpl.class);
 
     private List<University> universities;
