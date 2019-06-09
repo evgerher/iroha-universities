@@ -34,9 +34,9 @@ import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
 import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_SPECIALITY_ASSET_NAME;
 import static com.iroha.utils.IrohaUtils.createBatch;
 
-//TODO add swap speciality feature
 public class UniversityServiceImpl {
 
+    private final int NUM_UNIVERSITY_OPTIONS = 5;
     private static final Logger logger = LoggerFactory.getLogger(UniversityServiceImpl.class);
     private KeyPair universityKeyPair;
     private University university;
@@ -73,7 +73,7 @@ public class UniversityServiceImpl {
                 .build();
         api.transaction(transaction).subscribe(observer);
 
-        InlineTransactionStatusObserver obs = TransactionStatusObserver.builder()
+        val obs = TransactionStatusObserver.builder()
                 .onComplete(() -> logger.info("Account with userCode={} received {} wild tokens", applicant.getUserCode()))
                 .build();
 
@@ -81,20 +81,7 @@ public class UniversityServiceImpl {
         return applicant.getUserCode();
     }
 
-    /**
-     * Method generates 5 tokens for the requested `university`
-     *
-     * @param amount
-     * @param observer
-     */
-    private void generateWildTokensUniversity(int amount, Observer observer) {
-        val addTokens = Transaction
-                .builder(getAccountId(getUniversityAccountName(university), getUniversityDomain(university)))
-                .addAssetQuantity(getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN), Integer.toString(amount))
-                .sign(universityKeyPair)
-                .build();
-        api.transaction(addTokens).blockingSubscribe(observer);
-    }
+
 
     /**
      * Method sends 5 wild tokens for an applicant
@@ -105,7 +92,7 @@ public class UniversityServiceImpl {
      * @param observer
      */
     public void getWildTokensTransaction(Applicant applicant, Observer observer) {
-        Integer amount = 5;
+        val amount = NUM_UNIVERSITY_OPTIONS;
         generateWildTokensUniversity(amount, observer);
         val transaction = createTransactionFromUniversity(applicant, WILD_ASSET_NAME, amount, UNIVERSITIES_DOMAIN);
         api.transaction(transaction).subscribe(observer);
@@ -113,9 +100,15 @@ public class UniversityServiceImpl {
 
     public void chooseUniversity(Applicant applicant, KeyPair applicantKeyPair, Observer observer, University university, KeyPair universityKeyPair) {
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
-                createUnsignedAddAssetsToUniversity(getAssetId(WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 3, university).sign(universityKeyPair).build(),
-                createUnsignedTransactionToUniversity(applicant, getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN), 1, university).sign(applicantKeyPair).build(),
-                createUnsignedTransactionFromUniversity(applicant, getAssetId(WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 3, university).sign(universityKeyPair).build()
+                createUnsignedAddAssetsToUniversity(getAssetId(WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 3, university)
+                        .sign(universityKeyPair)
+                        .build(),
+                createUnsignedTransactionToUniversity(applicant, university, WILD_ASSET_NAME, 1)
+                        .sign(applicantKeyPair)
+                        .build(),
+                createUnsignedTransactionFromUniversity(applicant, university, WILD_SPECIALITY_ASSET_NAME,3)
+                        .sign(universityKeyPair)
+                        .build()
         );
         Map<TransactionOuterClass.Transaction, KeyPair> keys = new HashMap<>();
         keys.put(transactions.get(0), universityKeyPair);
@@ -133,10 +126,14 @@ public class UniversityServiceImpl {
     }
 
     public void chooseSpeciality(Applicant applicant, Speciality speciality, Observer observer, KeyPair applicantKeyPair, University university, KeyPair universityKeyPair) {
-        String assetName = ChainEntitiesUtils.getAssetName(speciality.getName(), getUniversityDomain(university));
+        val assetName = getAssetName(speciality.getName(), getUniversityDomain(university));
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
-                createUnsignedTransactionToUniversity(applicant, getAssetId(WILD_SPECIALITY_ASSET_NAME, getUniversityDomain(university)), 1, university).sign(applicantKeyPair).build(),
-                createUnsignedTransactionFromUniversity(applicant, getAssetId(assetName, getUniversityDomain(university)), 1, university).sign(universityKeyPair).build()
+                createUnsignedTransactionToUniversity(applicant, university, WILD_SPECIALITY_ASSET_NAME, 1)
+                        .sign(applicantKeyPair)
+                        .build(),
+                createUnsignedTransactionFromUniversity(applicant, university, assetName, 1)
+                        .sign(universityKeyPair)
+                        .build()
         );
         Map<TransactionOuterClass.Transaction, KeyPair> keys = new HashMap<>();
         keys.put(transactions.get(0), applicantKeyPair);
@@ -152,15 +149,19 @@ public class UniversityServiceImpl {
     }
 
 
-    public void swapUniversity(Applicant applicant, University sourceUniversity,
+    public void changeSpeciality(Applicant applicant, University sourceUniversity,
                                Speciality speciality, University destinationUniversity, KeyPair aplicantKey,
                                KeyPair destUniKey, Observer observer) {
-        String assetNameSource = getAssetName(speciality.getName(), getUniversityDomain(sourceUniversity));
-        String assetNameDest = getAssetName(speciality.getName(), getUniversityDomain(destinationUniversity));
+        val assetNameSource = getAssetName(speciality.getName(), getUniversityDomain(sourceUniversity));
+        val assetNameDest = getAssetName(speciality.getName(), getUniversityDomain(destinationUniversity));
 
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
-                createUnsignedTransactionToUniversity(applicant, getAssetId(assetNameSource, getUniversityDomain(sourceUniversity)), 1, sourceUniversity).sign(aplicantKey).build(),
-                createUnsignedTransactionFromUniversity(applicant, getAssetId(assetNameDest, getUniversityDomain(destinationUniversity)), 1, destinationUniversity).sign(destUniKey).build()
+                createUnsignedTransactionToUniversity(applicant,destinationUniversity , 1, )
+                        .sign(aplicantKey)
+                        .build(),
+                createUnsignedTransactionFromUniversity(applicant, sourceUniversity, assetNameDest, 1)
+                        .sign(destUniKey)
+                        .build()
         );
         Map<TransactionOuterClass.Transaction, KeyPair> keys = new HashMap<>();
         keys.put(transactions.get(0), aplicantKey);
@@ -169,15 +170,17 @@ public class UniversityServiceImpl {
         val waiter = new WaitForTerminalStatus();
         for (TransactionOuterClass.Transaction tx : transactions) {
             val hash = Utils.hash(tx);
-            waiter.subscribe(api, hash)
-                    .subscribe(observer);
+            waiter.subscribe(api, hash).subscribe(observer);
         }
     }
+
+    public void changeUniversity(Applicant applicant, University sourceUniversity,
+                                 Speciality speciality, University destinationUniversity, KeyPair aplicantKey,
+                                 KeyPair destUniKey, Observer observer) {}
     public List<QryResponses.AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
         val api = IrohaApiSingletone.getIrohaApiInstance();
-        String universityId =getAccountId(getUniversityAccountName(university),
-                getUniversityDomain(university));
-        String applicantId = getAccountId(getApplicantAccountName(applicant), UNIVERSITIES_DOMAIN);
+        val universityId =getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        val applicantId = getAccountId(getApplicantAccountName(applicant), UNIVERSITIES_DOMAIN);
 
         val query = Query.builder(universityId, 1)
                 .getAccountAssets(applicantId)
@@ -199,8 +202,8 @@ public class UniversityServiceImpl {
 
     private TransactionOuterClass.Transaction createTransactionToUniversity(Applicant applicant,
                                                                             String assetId, Integer assetsQuantity, KeyPair keyPair) {
-        String applicant_account = getApplicantAccountName(applicant);
-        String university_account = getUniversityAccountName(university);
+        val applicant_account = getApplicantAccountName(applicant);
+        val university_account = getUniversityAccountName(university);
         return Transaction.builder(applicant_account)
                 .addAssetQuantity(assetId, assetsQuantity.toString())
                 .transferAsset(applicant_account, university_account, assetId
@@ -211,12 +214,12 @@ public class UniversityServiceImpl {
 
     private TransactionOuterClass.Transaction createTransactionFromUniversity(Applicant applicant,
                                                                               String assetType, Integer assetsQuantity, String domain) {
-        String universityDomain = getUniversityDomain(university);
-        String applicantAccount = getApplicantAccountName(applicant);
-        String universityAccount = getUniversityAccountName(university);
-        String universityAccountId = getAccountId(universityAccount, universityDomain);
-        String applicationAccountId = getAccountId(applicantAccount, UNIVERSITIES_DOMAIN);
-        String assetId = getAssetId(assetType, domain);
+        val universityDomain = getUniversityDomain(university);
+        val applicantAccount = getApplicantAccountName(applicant);
+        val universityAccount = getUniversityAccountName(university);
+        val universityAccountId = getAccountId(universityAccount, universityDomain);
+        val applicationAccountId = getAccountId(applicantAccount, UNIVERSITIES_DOMAIN);
+        val assetId = getAssetId(assetType, domain);
 
         return Transaction.builder(universityAccountId)
                 .transferAsset(universityAccountId, applicationAccountId, assetId, "", assetsQuantity.toString())
@@ -226,10 +229,12 @@ public class UniversityServiceImpl {
 
 
 
-    private Transaction createUnsignedTransactionFromUniversity(Applicant applicant,
-                                                                String assetId, Integer assetsQuantity, University university) {
-        String accountId = getAccountId(getApplicantAccountName(applicant), UNIVERSITIES_DOMAIN);
-        String uniId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+    private Transaction createUnsignedTransactionFromUniversity(Applicant to,University from,
+                                                                String assetName, Integer assetsQuantity) {
+        val accountId = getAccountId(getApplicantAccountName(to), UNIVERSITIES_DOMAIN);
+        val uniId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        val assetId = getAssetId(assetName, getUniversityDomain(from));
+
         return Transaction.builder(uniId, Instant.now())
                 .transferAsset(uniId, accountId, assetId, "", assetsQuantity.toString())
                 .build();
@@ -237,23 +242,39 @@ public class UniversityServiceImpl {
 
 
 
-    private Transaction createUnsignedTransactionToUniversity(Applicant applicant, String assetId, Integer assetsQuantity, University university) {
-        String accountId = getAccountId(getApplicantAccountName(applicant), UNIVERSITIES_DOMAIN);
-        String uniId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+    private Transaction createUnsignedTransactionToUniversity(Applicant from, University to, String assetName, Integer assetsQuantity) {
+        val accountId = getAccountId(getApplicantAccountName(from), UNIVERSITIES_DOMAIN);
+        val uniId = getAccountId(getUniversityAccountName(to), getUniversityDomain(university));
+        val assetId = getAssetId(assetName, getUniversityDomain(to));
         return Transaction.builder(accountId, Instant.now())
                 .transferAsset(accountId, uniId, assetId, "", assetsQuantity.toString())
                 .build();
     }
 
     private Queries.Query constructQueryAccount(String accountId) {
-        String universityAccount = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        val universityAccount = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
         return Query.builder(universityAccount, 1).getAccount(accountId).buildSigned(universityKeyPair);
     }
 
     private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
-        String accountId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
+        val accountId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
         return Transaction.builder(accountId)
                 .addAssetQuantity(assetId, assetQunatity.toString())
                 .build();
+    }
+
+    /**
+     * Method generates 5 tokens for the requested `university`
+     *
+     * @param amount
+     * @param observer
+     */
+    private void generateWildTokensUniversity(int amount, Observer observer) {
+        val addTokens = Transaction
+                .builder(getAccountId(getUniversityAccountName(university), getUniversityDomain(university)))
+                .addAssetQuantity(getAssetId(WILD_ASSET_NAME, UNIVERSITIES_DOMAIN), Integer.toString(amount))
+                .sign(universityKeyPair)
+                .build();
+        api.transaction(addTokens).blockingSubscribe(observer);
     }
 }
