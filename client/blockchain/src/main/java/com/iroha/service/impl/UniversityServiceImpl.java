@@ -7,6 +7,7 @@ import iroha.protocol.Queries;
 import java.security.KeyPair;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 import com.iroha.model.Applicant;
@@ -25,6 +26,7 @@ import jp.co.soramitsu.iroha.java.TransactionStatusObserver;
 import jp.co.soramitsu.iroha.java.detail.InlineTransactionStatusObserver;
 import jp.co.soramitsu.iroha.java.subscription.WaitForTerminalStatus;
 import lombok.val;
+import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,15 +150,22 @@ public class UniversityServiceImpl {
         }
     }
 
+    public void returnAllUniversityTokens(Applicant applicant, University university){
+
+    }
 
     public void changeSpeciality(Applicant applicant, University sourceUniversity,
-                               Speciality speciality, University destinationUniversity, KeyPair aplicantKey,
+                                University destinationUniversity,Speciality currentSpeciality,Speciality newSpeciality, KeyPair aplicantKey,
                                KeyPair destUniKey, Observer observer) {
-        val assetNameSource = getAssetName(speciality.getName(), getUniversityDomain(sourceUniversity));
-        val assetNameDest = getAssetName(speciality.getName(), getUniversityDomain(destinationUniversity));
+        if (!canApplicantChooseUniversity(applicant,destinationUniversity)){
+            throw new IllegalArgumentException("Can't get speciality for destination university");
+        }
+
+        val assetNameSource = getAssetName(currentSpeciality.getName(), getUniversityDomain(sourceUniversity));
+        val assetNameDest = getAssetName(newSpeciality.getName(), getUniversityDomain(destinationUniversity));
 
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
-                createUnsignedTransactionToUniversity(applicant,destinationUniversity , 1, )
+                createUnsignedTransactionToUniversity(applicant,destinationUniversity , assetNameSource, 1 )
                         .sign(aplicantKey)
                         .build(),
                 createUnsignedTransactionFromUniversity(applicant, sourceUniversity, assetNameDest, 1)
@@ -174,9 +183,19 @@ public class UniversityServiceImpl {
         }
     }
 
-    public void changeUniversity(Applicant applicant, University sourceUniversity,
-                                 Speciality speciality, University destinationUniversity, KeyPair aplicantKey,
-                                 KeyPair destUniKey, Observer observer) {}
+    public boolean canApplicantChooseUniversity(Applicant applicant, University university){
+        List<QryResponses.AccountAsset> assets = getAllAssertsOfApplicant(applicant);
+        Set<String> universities = assets.stream()
+                                        .map(asset -> {
+                                            var assetId =  asset.getAssetId();
+                                            int splitPosition = assetId.indexOf("@");
+                                            return assetId.substring(splitPosition+1);
+                                        })
+                                        .distinct()
+                                        .collect(Collectors.toSet());
+
+        return !universities.contains(university.getName()) && universities.size() > NUM_UNIVERSITY_OPTIONS;
+    }
     public List<QryResponses.AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
         val api = IrohaApiSingletone.getIrohaApiInstance();
         val universityId =getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
@@ -188,6 +207,8 @@ public class UniversityServiceImpl {
         val balance = api.query(query);
         return balance.getAccountAssetsResponse().getAccountAssetsList();
     }
+
+
 
     public int getBalanceOfApplicant(Applicant applicant, String assertType) {
         val assets = getAllAssertsOfApplicant(applicant);
