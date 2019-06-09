@@ -277,11 +277,6 @@ public class UniversityServiceImpl implements UniversityService {
                 .build();
     }
 
-    private Queries.Query constructQueryAccount(String accountId) {
-        val universityAccount = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
-        return Query.builder(universityAccount, 1).getAccount(accountId).buildSigned(universityKeyPair);
-    }
-
     private Transaction createUnsignedAddAssetsToUniversity(String assetId, Integer assetQunatity, University university) {
         val accountId = getAccountId(getUniversityAccountName(university), getUniversityDomain(university));
         return Transaction.builder(accountId)
