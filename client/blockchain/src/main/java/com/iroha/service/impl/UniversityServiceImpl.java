@@ -1,8 +1,8 @@
 package com.iroha.service.impl;
 
+import com.iroha.model.parameter_objects.SpecialityChangeParameters;
 import com.iroha.model.university.Speciality;
 import com.iroha.service.UniversityService;
-import iroha.protocol.Queries;
 
 import java.security.KeyPair;
 import java.time.Instant;
@@ -159,21 +159,21 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Override
-    public void changeSpeciality(Applicant applicant, University sourceUniversity,
-                                 University destinationUniversity, Speciality currentSpeciality, Speciality newSpeciality, KeyPair aplicantKey,
+    public void changeSpeciality(Applicant applicant,
+                                 SpecialityChangeParameters specialityChangeParameters, KeyPair aplicantKey,
                                  KeyPair destUniKey, Observer observer) {
-        if (!canApplicantChooseUniversity(applicant,destinationUniversity)){
+        if (!canApplicantChooseUniversity(applicant, specialityChangeParameters.getDestinationUniversity())){
             throw new IllegalArgumentException("Can't get speciality for destination university");
         }
 
-        val assetNameSource = getAssetName(currentSpeciality.getName(), getUniversityDomain(sourceUniversity));
-        val assetNameDest = getAssetName(newSpeciality.getName(), getUniversityDomain(destinationUniversity));
+        val assetNameSource = getAssetName(specialityChangeParameters.getCurrentSpeciality().getName(), getUniversityDomain(specialityChangeParameters.getSourceUniversity()));
+        val assetNameDest = getAssetName(specialityChangeParameters.getNewSpeciality().getName(), getUniversityDomain(specialityChangeParameters.getDestinationUniversity()));
 
         List<TransactionOuterClass.Transaction> transactions = Arrays.asList(
-                createUnsignedTransactionToUniversity(applicant,destinationUniversity , assetNameSource, 1 )
+                createUnsignedTransactionToUniversity(applicant, specialityChangeParameters.getDestinationUniversity(), assetNameSource, 1 )
                         .sign(aplicantKey)
                         .build(),
-                createUnsignedTransactionFromUniversity(applicant, sourceUniversity, assetNameDest, 1)
+                createUnsignedTransactionFromUniversity(applicant, specialityChangeParameters.getSourceUniversity(), assetNameDest, 1)
                         .sign(destUniKey)
                         .build()
         );

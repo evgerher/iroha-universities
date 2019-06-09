@@ -1,6 +1,7 @@
 package com.iroha;
 
 import com.iroha.model.Applicant;
+import com.iroha.model.parameter_objects.SpecialityChangeParameters;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.service.GenesisGenerator;
@@ -193,7 +194,7 @@ public class IrohaMain {
       logger.info(String.format("%s %s",asset.getAssetId(),asset.getBalance()));
     }
 
-    service.changeSpeciality(applicant,university,kai,speciality,speciality,applicantKeys, uniKeys.get(kai.getName()), observer);
+    service.changeSpeciality(applicant, new SpecialityChangeParameters(university, kai, speciality, speciality), applicantKeys, uniKeys.get(kai.getName()), observer);
     logger.info("Sleep for 10 seconds");
 
     sleep(20000);

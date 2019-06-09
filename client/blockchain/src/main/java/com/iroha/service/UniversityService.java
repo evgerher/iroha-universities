@@ -1,6 +1,7 @@
 package com.iroha.service;
 
 import com.iroha.model.Applicant;
+import com.iroha.model.parameter_objects.SpecialityChangeParameters;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import io.reactivex.Observer;
@@ -17,7 +18,7 @@ public interface UniversityService {
 
     void returnAllUniversityTokens(Applicant applicant, University university);
 
-    void changeSpeciality(Applicant applicant, University sourceUniversity,
-                          University destinationUniversity, Speciality currentSpeciality, Speciality newSpeciality, KeyPair aplicantKey,
+    void changeSpeciality(Applicant applicant,
+                          SpecialityChangeParameters specialityChangeParameters, KeyPair aplicantKey,
                           KeyPair destUniKey, Observer observer);
 }
