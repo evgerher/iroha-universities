@@ -1,6 +1,7 @@
 package com.iroha.service;
 
 import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.requests.SelectUniversityRequest;
 import com.iroha.model.applicant.responses.ApplicantResponse;
 import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
 import com.iroha.model.applicant.requests.SelectSpecialityRequest;
@@ -16,4 +17,5 @@ public interface ApplicantService {
 
   void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect);
   void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange);
+  void selectUniversity(String userCode, SelectUniversityRequest applicantSelect);
 }
