@@ -4,6 +4,7 @@ import com.iroha.dao.MongoDBConnector;
 import com.iroha.model.Applicant;
 import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.responses.RegistrationTx;
+import com.iroha.model.parameter_objects.SpecialityChangeParameters;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
 import com.iroha.service.QueryToChainService;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Class wrapper around UniversityService (provided by blockchain module)
+ * Class wrapper around UniversityServiceImpl (provided by blockchain module)
  */
 public class UniversityWiredService {
 
@@ -36,7 +37,7 @@ public class UniversityWiredService {
     this.mongoConnector = mongoConnector;
     University university = mongoConnector.getUniversity(uniName);
     KeyPair keys = mongoConnector.getUniversityKeys(uniName);
-    universityService = new UniversityService(keys, university);
+    universityService = new UniversityServiceImpl(keys, university);
     queryToChainService = new QueryToChainService(keys, university);
   }
 
@@ -114,8 +115,11 @@ public class UniversityWiredService {
     KeyPair uniToKey = mongoConnector.getUniversityKeys(universityTo.getName());
     KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
 
-    universityService.swapUniversity(applicant, universityFrom, specialityFrom, universityTo,
-        applicantKey, uniToKey, getDefaultObserver());
+    universityService.changeSpeciality(applicant,
+        new SpecialityChangeParameters(universityFrom, universityTo, specialityFrom, specialityTo),
+        applicantKey,
+        uniToKey,
+        getDefaultObserver());
   }
 
   /**

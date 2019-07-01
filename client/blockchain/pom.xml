@@ -11,7 +11,22 @@
 
   <artifactId>blockchain</artifactId>
 
+  <properties>
+    <iroha.version>5.2.0</iroha.version>
+  </properties>
+
   <repositories>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+    </repository>
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
@@ -27,12 +42,12 @@
     <dependency>
       <groupId>com.github.hyperledger.iroha-java</groupId>
       <artifactId>client</artifactId>
-      <version>4.0.0</version>
+      <version>${iroha.version}</version>
     </dependency>
     <dependency>
       <groupId>com.github.hyperledger.iroha-java</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>4.0.0</version>
+      <version>${iroha.version}</version>
     </dependency>
   </dependencies>
 
