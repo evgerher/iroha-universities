@@ -3,10 +3,10 @@ package com.iroha.service.impl;
 import com.iroha.dao.MongoDBConnector;
 import com.iroha.model.Applicant;
 import com.iroha.model.applicant.TxHash;
-import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.responses.RegistrationTx;
 import com.iroha.model.university.Speciality;
 import com.iroha.model.university.University;
+import com.iroha.service.QueryToChainService;
 import com.iroha.service.UniversityService;
 import com.iroha.utils.ChainEntitiesUtils;
 import io.reactivex.Observer;
@@ -29,6 +29,7 @@ public class UniversityWiredService {
 
   private final MongoDBConnector mongoConnector;
   private final UniversityService universityService;
+  private final QueryToChainService queryToChainService;
 
   public UniversityWiredService(String uniName,
       @Qualifier("createConnector") MongoDBConnector mongoConnector) {
@@ -36,6 +37,7 @@ public class UniversityWiredService {
     University university = mongoConnector.getUniversity(uniName);
     KeyPair keys = mongoConnector.getUniversityKeys(uniName);
     universityService = new UniversityService(keys, university);
+    queryToChainService = new QueryToChainService(keys, university);
   }
 
   /**
@@ -56,7 +58,7 @@ public class UniversityWiredService {
    */
   public List<AccountAsset> getAllAssertsOfApplicant(Applicant applicant) {
     logger.info("Request assets of applicant={}", applicant.getUserCode());
-    return universityService.getAllAssertsOfApplicant(applicant);
+    return queryToChainService.getAllAssertsOfApplicant(applicant);
   }
 
   /**
@@ -71,7 +73,7 @@ public class UniversityWiredService {
       logger.info("Request account by txhash={}", txhash);
       RegistrationTx regTx = mongoConnector.getRegistrationMapping(txhash.getTxhash());
       String accountId = regTx.getPayload();
-      Account account = universityService.getAccount(accountId);
+      Account account = queryToChainService.getAccount(accountId);
       return account.getJsonData();
     } catch (Exception e) {
       e.printStackTrace();
@@ -80,30 +82,46 @@ public class UniversityWiredService {
   }
 
   /**
-   * Method utilizes two atomic batches: select university & select speciality If university is
+   * Method exchanges (university wild token -> specific university 5 speciality wild tokens)
+   * @param applicant
+   * @param university
+   */
+  public void selectUniversity(Applicant applicant, University university) {
+    KeyPair uniKey = mongoConnector.getUniversityKeys(university.getName());
+    KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
+
+    universityService.chooseUniversity(applicant, applicantKey, university, uniKey, getDefaultObserver());
+  }
+
+  /**
+   * Method utilizes two atomic batches:  select speciality If university is
    * already selected - applicant assets won't change If speciality is already selected - applicant
    * assets won't change If error occured - applicant assets won't change
    *
-   * @param userCode of the applicant
-   * @param applicantSelect selected speciality
+   * @param applicant
+   * @param university to select from
+   * @param speciality selected
    */
-  public void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect) {
-    Applicant applicant = mongoConnector.getApplicant(userCode);
-    University uni = mongoConnector.getUniversity(applicantSelect.getUniversity());
-    KeyPair uniKey = mongoConnector.getUniversityKeys(applicantSelect.getUniversity());
+  public void selectSpeciality(Applicant applicant, University university, Speciality speciality) {
+    KeyPair uniKey = mongoConnector.getUniversityKeys(university.getName());
     KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
-    Speciality speciality = mongoConnector
-        .getSpecialities(applicantSelect.getCode(), applicantSelect.getUniversity()).get(0);
 
-    universityService.chooseUniversity(applicant, applicantKey, getDefaultObserver(), uni, uniKey);
-    universityService
-        .chooseSpeciality(applicant, speciality, getDefaultObserver(), applicantKey, uni, uniKey);
+    universityService.chooseSpeciality(applicant, speciality, applicantKey, university, uniKey, getDefaultObserver());
+  }
+
+  public void swapUniversity(Applicant applicant, University universityFrom, Speciality specialityFrom,
+      University universityTo, Speciality specialityTo) {
+    KeyPair uniToKey = mongoConnector.getUniversityKeys(universityTo.getName());
+    KeyPair applicantKey = ChainEntitiesUtils.getKeys(applicant);
+
+    universityService.swapUniversity(applicant, universityFrom, specialityFrom, universityTo,
+        applicantKey, uniToKey, getDefaultObserver());
   }
 
   /**
    * Method generates default logging observer
    */
-  public static Observer getDefaultObserver() {
+  private static Observer getDefaultObserver() {
     return TransactionStatusObserver.builder()
         // executed when stateless or stateful validation is failed
         .onTransactionFailed(t -> logger.info(String.format(

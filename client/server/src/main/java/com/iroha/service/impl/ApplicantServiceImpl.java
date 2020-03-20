@@ -5,12 +5,15 @@ import com.iroha.model.Applicant;
 import com.iroha.model.Asset;
 import com.iroha.model.applicant.TxHash;
 import com.iroha.model.applicant.requests.ApplicantRegisterRequest;
+import com.iroha.model.applicant.requests.SelectUniversityRequest;
 import com.iroha.model.applicant.responses.ApplicantResponse;
 import com.iroha.model.applicant.requests.ExchangeSpecialityRequest;
 import com.iroha.model.applicant.requests.SelectSpecialityRequest;
 import com.iroha.model.applicant.UserCode;
 
 import com.iroha.model.applicant.responses.RegistrationTx;
+import com.iroha.model.university.Speciality;
+import com.iroha.model.university.University;
 import com.iroha.service.ApplicantService;
 import com.iroha.utils.ChainEntitiesUtils;
 
@@ -119,12 +122,45 @@ public class ApplicantServiceImpl implements ApplicantService {
 
   @Override
   public void selectSpeciality(String userCode, SelectSpecialityRequest applicantSelect) {
-    universityService.selectSpeciality(userCode, applicantSelect);
+    String uniName = applicantSelect.getUniversity();
+    String specCode = applicantSelect.getCode();
+
+    Applicant applicant = mongoConnector.getApplicant(userCode);
+    University uni = mongoConnector.getUniversity(uniName);
+    Speciality speciality = mongoConnector.getSpecialities(specCode, uniName).get(0);
+
+    universityService.selectSpeciality(applicant, uni, speciality);
+  }
+
+  /**
+   * Method swaps specialities between universities, if the speciality is the same
+   * @param userCode of the applicant
+   * @param applicantExchange object with swap items
+   */
+  @Override
+  public void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange) {
+    // todo: add support for different exchanges
+    Applicant applicant = mongoConnector.getApplicant(userCode);
+    String uniFrom = applicantExchange.getFrom().getUniversity();
+    String uniTo = applicantExchange.getTo().getUniversity();
+    String specFrom = applicantExchange.getFrom().getCode();
+    String specTo = applicantExchange.getTo().getCode();
+
+    University universityFrom = mongoConnector.getUniversity(uniFrom);
+    University universityTo = mongoConnector.getUniversity(uniTo);
+    Speciality specialityFrom = mongoConnector.getSpecialities(specFrom, uniFrom).get(0); // todo: looks bad
+    Speciality specialityTo = mongoConnector.getSpecialities(specTo, uniTo).get(0);
+
+    universityService.swapUniversity(applicant, universityFrom, specialityFrom,
+        universityTo, specialityTo);
   }
 
   @Override
-  public void exchangeSpecialities(String userCode, ExchangeSpecialityRequest applicantExchange) {
-    // todo: connect to dilshat's code
+  public void selectUniversity(String userCode, SelectUniversityRequest applicantSelect) {
+    Applicant applicant = mongoConnector.getApplicant(userCode);
+    University university = mongoConnector.getUniversity(applicantSelect.getUniversity());
+
+    universityService.selectUniversity(applicant, university);
   }
 
   /**

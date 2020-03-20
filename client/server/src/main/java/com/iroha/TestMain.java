@@ -1,8 +1,5 @@
 package com.iroha;
 
-import static com.iroha.utils.ChainEntitiesUtils.Consts.UNIVERSITIES_DOMAIN;
-import static com.iroha.utils.ChainEntitiesUtils.Consts.WILD_ASSET_NAME;
-
 import com.iroha.dao.MongoDBConnector;
 import com.iroha.model.university.University;
 import com.iroha.utils.ChainEntitiesUtils;
